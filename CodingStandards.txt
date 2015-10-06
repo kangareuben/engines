@@ -1,0 +1,10 @@
+Coding Standards:
+
+1. Class names in camel-case, starting with an uppercase letter. Example: ClassName.
+2. Function names in camel-case, starting with a lowercase letter. Example: functionName.
+3. Variable names in camel-case, starting with an underscore, then a lowercase letter. Example: _variableName.
+4. Pointer variable names in camel-case, starting with "ptr," then an underscore, then a lowercase letter. Example: ptr_variableName.
+5. Opening and closing curly braces should be on their own lines.
+6. Use a single line break between functions.
+7. Use a single line break before any comment.
+7. When indenting, use four spaces rather than a tab.
