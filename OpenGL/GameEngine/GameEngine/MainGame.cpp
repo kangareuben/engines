@@ -2,7 +2,7 @@
 #include "Errors.h"
 #include "iostream"
 #include "ObjLoader.h"
-#include <boost/thread/thread.hpp>
+//#include <boost/thread/thread.hpp>
 
 
 using namespace std;
@@ -107,8 +107,8 @@ void MainGame::initSystems()
 void MainGame::run()
 {
 	initSystems();
-	//obj.load("Models/Teapot.obj");
-	//obj2.load("Models/ViolinCase.obj");
+	obj.load("Models/Teapot.obj");
+	obj2.load("Models/ViolinCase.obj");
 
 	gameLoop();
 }
@@ -320,12 +320,12 @@ void MainGame::calculateFPS()
 int main(int argc, char **argv)
 {
 	MainGame mainGame;
-	boost::thread thrd1(&fn1);
+/*	boost::thread thrd1(&fn1);
 	boost::thread thrd2(&fn2);
 	boost::thread thrd3(&fn3);
 	thrd1.join();
 	thrd2.join();
-	thrd3.join();
+	thrd3.join();*/
 
 	mainGame.run();
 
