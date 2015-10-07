@@ -1,8 +1,8 @@
 #pragma once
 #include <math.h>
 #include <iostream>
-#include <SDL/SDL.h>
-#include <GL/glew.h>
+#include <SDL.h>
+#include <glew.h>
 using namespace std;
 class Camera
 {
