@@ -53,20 +53,20 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>E:\boost\boost_1_59_0\;E:\boost\boost_1_59_0\boost\thread;$(SolutionDir)\Glew\include;$(SolutionDir)\SDL\include\;$(SolutionDir)\SOIL\src\;$(IncludePath)</IncludePath>
-    <LibraryPath>E:\boost\boost_1_59_0\libs\thread;$(SolutionDir)\SDL\lib;$(SolutionDir)\Glew\lib;$(SolutionDir)\SOIL\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>E:\boost\boost_1_59_0\;E:\boost\boost_1_59_0\boost\thread;$(SolutionDir)\GL\include;$(SolutionDir)\SDL\include;$(SolutionDir)\SOIL\include;$(IncludePath)</IncludePath>
+    <LibraryPath>E:\boost\boost_1_59_0\libs\thread;$(SolutionDir)\SDL\lib;$(SolutionDir)\GL\lib;$(SolutionDir)\SOIL\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>E:\boost\boost_1_59_0\;E:\boost\boost_1_59_0\boost\thread;$(SolutionDir)\Glew\include;$(SolutionDir)\SDL\include\;$(SolutionDir)\SOIL\src\;$(IncludePath)</IncludePath>
-    <LibraryPath>E:\boost\boost_1_59_0\libs\thread;$(SolutionDir)\SDL\lib;$(SolutionDir)\Glew\lib;$(SolutionDir)\SOIL\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>E:\boost\boost_1_59_0\;E:\boost\boost_1_59_0\boost\thread;$(SolutionDir)\GL\include;$(SolutionDir)\SDL\include;$(SolutionDir)\SOIL\include;$(IncludePath)</IncludePath>
+    <LibraryPath>E:\boost\boost_1_59_0\libs\thread;$(SolutionDir)\SDL\lib;$(SolutionDir)\GL\lib;$(SolutionDir)\SOIL\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>E:\boost\boost_1_59_0\;E:\boost\boost_1_59_0\boost\thread;$(SolutionDir)\Glew\include;$(SolutionDir)\SDL\include\;$(SolutionDir)\SOIL\src\;$(IncludePath)</IncludePath>
-    <LibraryPath>E:\boost\boost_1_59_0\libs\thread;$(SolutionDir)\SDL\lib;$(SolutionDir)\Glew\lib;$(SolutionDir)\SOIL\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>E:\boost\boost_1_59_0\;E:\boost\boost_1_59_0\boost\thread;$(SolutionDir)\GL\include;$(SolutionDir)\SDL\include;$(SolutionDir)\SOIL\include;$(IncludePath)</IncludePath>
+    <LibraryPath>E:\boost\boost_1_59_0\libs\thread;$(SolutionDir)\SDL\lib;$(SolutionDir)\GL\lib;$(SolutionDir)\SOIL\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>E:\boost\boost_1_59_0\;E:\boost\boost_1_59_0\boost\thread;$(SolutionDir)\Glew\include;$(SolutionDir)\SDL\include\;$(SolutionDir)\SOIL\src\;$(IncludePath)</IncludePath>
-    <LibraryPath>E:\boost\boost_1_59_0\libs\thread;$(SolutionDir)\SDL\lib;$(SolutionDir)\Glew\lib;$(SolutionDir)\SOIL\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>E:\boost\boost_1_59_0\;E:\boost\boost_1_59_0\boost\thread;$(SolutionDir)\GL\include;$(SolutionDir)\SDL\include;$(SolutionDir)\SOIL\include;$(IncludePath)</IncludePath>
+    <LibraryPath>E:\boost\boost_1_59_0\libs\thread;$(SolutionDir)\SDL\lib;$(SolutionDir)\GL\lib;$(SolutionDir)\SOIL\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
