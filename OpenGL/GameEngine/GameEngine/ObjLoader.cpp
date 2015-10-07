@@ -4,8 +4,8 @@
 #include <string>
 #include <fstream>
 #include "Errors.h"
-#include <SDL/SDL.h>
-#include <GL/glew.h>
+#include <SDL.h>
+#include <glew.h>
 using namespace std;
 ObjLoader::ObjLoader()
 {
