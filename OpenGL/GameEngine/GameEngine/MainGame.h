@@ -18,8 +18,8 @@ public:
 	void processInput();
 	void mouseLook(int, int);
 	GameState _gameState;
-	//ObjLoader obj;
-	//ObjLoader obj2;
+	ObjLoader obj;
+	ObjLoader obj2;
 	Camera mainCam;
 	ObjLoader cam;
 	float _xDist;

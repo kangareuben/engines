@@ -2,11 +2,11 @@
 #include "Errors.h"
 #include "iostream"
 #include "ObjLoader.h"
-//#include <boost/thread/thread.hpp>
+#include <boost/thread/thread.hpp>
 
 
 using namespace std;
-ObjLoader obj;
+/*ObjLoader obj;
 ObjLoader obj2;
 ObjLoader obj3;
 
@@ -24,7 +24,7 @@ void fn2()
 void fn3()
 {
 	 obj3.load("Models/Teapot.obj");
-}
+}*/
 
 MainGame::MainGame()
 {
@@ -258,10 +258,10 @@ void MainGame::draw()
 	obj2.Draw();
 	glPopMatrix();
 
-	glPushMatrix();
+	/*glPushMatrix();
 	glTranslatef(5, 5, 0);
 	obj3.Draw();
-	glPopMatrix();
+	glPopMatrix();*/
 
 	SDL_GL_SwapWindow(ptr_window);
 
