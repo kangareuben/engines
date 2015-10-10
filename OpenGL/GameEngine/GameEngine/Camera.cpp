@@ -1,4 +1,6 @@
 #include "Camera.h"
+#include <SDL/SDL.h>
+#include <GL/glew.h>
 #ifndef M_PI
 #define M_PI  3.14159
 #endif
@@ -65,4 +67,5 @@ void Camera::control(float moveVel, float mouseVel, bool mi, SDL_Window *ptr_win
 void Camera:: updateCamera()
 {
 	glTranslatef(-camX, -camY, -camZ);        //move the camera
+	
 }

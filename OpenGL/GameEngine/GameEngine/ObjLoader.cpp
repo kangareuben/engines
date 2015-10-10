@@ -4,13 +4,26 @@
 #include <string>
 #include <fstream>
 #include "Errors.h"
-#include <SDL.h>
-#include <glew.h>
+#include <SDL/SDL.h>
+#include <GL/glew.h>
+#include <iostream>
+float a[16];
+
 using namespace std;
 ObjLoader::ObjLoader()
 {
 	this->_totalConnectedPoints = 0;
 	this->_totalConnectedTriangles = 0;
+	gravityAcceleration = 0.01f;
+	position.push_back(0);
+	position.push_back(0);
+	position.push_back(0);
+
+	velocity.push_back(0);
+	velocity.push_back(0);
+	velocity.push_back(0);
+
+
 }
 
 
@@ -45,9 +58,18 @@ float *ObjLoader::calculateNormal(float *ptr_coord1, float *ptr_coord2, float *p
 	return norm;
 }
 
-int ObjLoader::load(char *fileName)
+int ObjLoader::load(char *fileName, float a,float b, float c, bool graveety,int collider,float w,float h,float d,float m)
 {
+	colliderType = collider;
 	string line;
+	width = w;
+	height = h;
+	depth = d;
+	mass = m;
+	position[0] = a;
+	position[1] = b;
+	position[2] = c;
+	gravity = graveety;
 	ifstream objFile(fileName);
 	if (objFile.is_open())
 	{
@@ -133,6 +155,15 @@ int ObjLoader::load(char *fileName)
 		fatalError("Unable to open obj file");
 	}
 
+	point1[0] = position[0] - width / 2; point1[1] = position[1] - height / 2; point1[2] = position[2] - depth / 2;
+	point2[0] = position[0] + width / 2; point2[1] = position[1] - height / 2; point2[2] = position[2] - depth / 2;
+	point3[0] = position[0] - width / 2; point3[1] = position[1] + height / 2; point3[2] = position[2] - depth / 2;
+	point4[0] = position[0] + width / 2; point4[1] = position[1] + height / 2; point4[2] = position[2] - depth / 2;
+	point5[0] = position[0] - width / 2; point5[1] = position[1] - height / 2; point5[2] = position[2] + depth / 2;
+	point6[0] = position[0] + width / 2; point6[1] = position[1] - height / 2; point6[2] = position[2] + depth / 2;
+	point7[0] = position[0] - width / 2; point7[1] = position[1] + height / 2; point7[2] = position[2] + depth / 2;
+	point8[0] = position[0] + width / 2; point8[1] = position[1] + height / 2; point8[2] = position[2] + depth / 2;
+
 	return 0;
 }
 
@@ -149,8 +180,49 @@ void ObjLoader::Draw()
 	glEnableClientState(GL_NORMAL_ARRAY);
 	glVertexPointer(3, GL_FLOAT, 0, ptr_facesTriangles);
 	glNormalPointer(GL_FLOAT, 0, ptr_normals);
+	glTranslatef(position[0], position[1], position[2]);
+
+
+	
 	glDrawArrays(GL_TRIANGLES, 0, _totalConnectedTriangles);
+	
 	glDisableClientState(GL_VERTEX_ARRAY);
 	glDisableClientState(GL_NORMAL_ARRAY);
+}
 
+float ObjLoader::getX()
+{
+	return position[0];
+}
+
+float ObjLoader::getY()
+{
+	return position[1];
+}
+
+float ObjLoader::getZ()
+{
+	return position[2];
+}
+
+void ObjLoader::update(float dt)
+{
+	
+	if (gravity == true && position[1]!=0 )
+	{
+	
+		velocity[1] -= gravityAcceleration * dt;
+		position[1] = position[1] + velocity[1] * dt;
+	}
+
+	position[0] += velocity[0] * dt;
+	position[2] += velocity[2] * dt;
+}
+
+
+void ObjLoader::setVelocity(float a, float b, float c)
+{
+	velocity[0] = a;
+	velocity[1] = b;
+	velocity[2] = c;
 }

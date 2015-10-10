@@ -1,9 +1,11 @@
 #pragma once
-#include <SDL.h>
-#include <glew.h>
+#include <SDL/SDL.h>
+#include <GL/glew.h>
 #include "ObjLoader.h"
 #include "Camera.h"
-
+#include <time.h>
+#include <ctime>
+#include <algorithm>
 enum class GameState { PLAY, EXIT };
 
 class MainGame
@@ -18,8 +20,15 @@ public:
 	void processInput();
 	void mouseLook(int, int);
 	GameState _gameState;
+	double currentTime;
 	ObjLoader obj;
+	bool checkCollision(ObjLoader*,ObjLoader*);
 	ObjLoader obj2;
+	ObjLoader obj3;
+	ObjLoader box1;
+	ObjLoader box2;
+	ObjLoader box3;
+	ObjLoader player;
 	Camera mainCam;
 	ObjLoader cam;
 	float _xDist;

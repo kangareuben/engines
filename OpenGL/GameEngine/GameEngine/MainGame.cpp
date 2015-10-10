@@ -3,31 +3,21 @@
 #include "iostream"
 #include "ObjLoader.h"
 #include <boost/thread/thread.hpp>
-
-
+double alpha = 0.0f;
+bool j;
+bool k;
+bool l;
+float t = 0.0f;
 using namespace std;
-/*ObjLoader obj;
-ObjLoader obj2;
-ObjLoader obj3;
-
-void fn1()
-{
-	 obj.load("Models/Teapot.obj");
-
-}
-void fn2()
-{
-	 obj2.load("Models/ViolinCase.obj");
-
-}
-
-void fn3()
-{
-	 obj3.load("Models/Teapot.obj");
-}*/
+double accumulator = 0.0;
+float dt =0.0f;
+// 0 - ground
+// 1 - box 
+// 2 - sphere
 
 MainGame::MainGame()
 {
+	currentTime = 0;
 	ptr_window = nullptr;
 	_windowWidth = 640;
 	_windowHeight = 480;
@@ -107,9 +97,15 @@ void MainGame::initSystems()
 void MainGame::run()
 {
 	initSystems();
-	obj.load("Models/Teapot.obj");
-	obj2.load("Models/ViolinCase.obj");
-
+	//file path,initial x, initial y, initial z, gravity true or false, colliderType, width,height,depth,mass
+	obj.load("Models/Box.obj",2,20,20,true,1,1,1,1,1);
+	obj2.load("Models/Sphere.obj",-2,20,20,true,2,1,1,1,2);
+	obj3.load("Models/Terrain.obj", 0,0,0,false,0,200, 1,200,1000);
+	box1.load("Models/Box.obj", 2, 10, 20, true, 1, 1, 1, 1,2);
+	box2.load("Models/Box.obj", 10, 0, 20, true, 1, 1, 1, 1,3);
+	box3.load("Models/Box.obj", -10, 0, 20, true, 1, 1, 1, 1,4);
+	box2.setVelocity(-0.1f, 0, 0);
+	box3.setVelocity(0.1f, 0, 0);
 	gameLoop();
 }
 
@@ -118,26 +114,49 @@ void MainGame::gameLoop()
 	//Will loop until we set _gameState to EXIT
 	while (_gameState != GameState::EXIT)
 	{
-		float _startTicks = SDL_GetTicks();
+		const float DESIRED_FPS = 60.0f;
+		const float MS_PER_SECOND = 1000.0f;
+		const float DESIRED_FRAMETIME = MS_PER_SECOND / DESIRED_FPS;
+		const int MAX_PHYSICS_STEPS = 6;
+		const float MAX_DELTA_TIME = 1.0f;
+		float previousTicks = SDL_GetTicks();
+
 		processInput();
 		draw();
-		calculateFPS();
-		//print only once every 10 frames
-		static int _frameCounter = 0;
-		_frameCounter++;
-		if (_frameCounter == 10)
-		{
-			//	cout << _fps << endl;
-			_frameCounter = 0;
-		}
 
-		float _frameTicks = SDL_GetTicks() - _startTicks;
 
-		//limit FPS to max FPS
-		if (1000.0f / _maxFPS > _frameTicks)
+		float newTicks = SDL_GetTicks();
+		float frameTime = newTicks - previousTicks;
+		previousTicks = newTicks;
+		dt = frameTime / DESIRED_FRAMETIME;
+	
+		int i = 0;
+		while (dt>0.0f && i <MAX_PHYSICS_STEPS )
 		{
-			SDL_Delay(1000.0f / _maxFPS - _frameTicks);
+			float deltaTime;
+
+
+			if (dt < MAX_DELTA_TIME)
+				deltaTime = dt;
+			else
+				deltaTime = MAX_DELTA_TIME;
+
+
+			checkCollision(&obj, &obj3);
+			checkCollision(&obj2, &obj3);
+			checkCollision(&obj, &box1);
+			checkCollision(&box1, &obj3);
+			checkCollision(&box2, &box3);
+			obj.update(deltaTime);
+		 	obj2.update(deltaTime);
+			box1.update(deltaTime);
+			box2.update(deltaTime);
+			box3.update(deltaTime);
+
+			i++;
+			dt -= deltaTime;
 		}
+		
 	}
 }
 
@@ -247,21 +266,28 @@ void MainGame::draw()
 	glTranslatef(mainCam.camX*-1, mainCam.camY*-1, mainCam.camZ*-1);
 
 	glPushMatrix();
-	glTranslatef(mainCam.camX*-1, mainCam.camY*-1, mainCam.camZ*-1);
-	glPopMatrix();
-	glPushMatrix();
-	glTranslatef(-2, 0, 0);
 	obj.Draw();
 	glPopMatrix();
+
 	glPushMatrix();
-	glTranslatef(2, 0, 0);
 	obj2.Draw();
 	glPopMatrix();
-
-	/*glPushMatrix();
-	glTranslatef(5, 5, 0);
+	
+	glPushMatrix();
 	obj3.Draw();
-	glPopMatrix();*/
+	glPopMatrix();
+
+	glPushMatrix();
+	box1.Draw();
+	glPopMatrix();
+
+	glPushMatrix();
+	box2.Draw();
+	glPopMatrix();
+
+	glPushMatrix();
+	box3.Draw();
+	glPopMatrix();
 
 	SDL_GL_SwapWindow(ptr_window);
 
@@ -325,9 +351,152 @@ int main(int argc, char **argv)
 	boost::thread thrd3(&fn3);
 	thrd1.join();
 	thrd2.join();
-	thrd3.join();*/
-
+	thrd3.join();
+*/
 	mainGame.run();
 
 	return 0;
+}
+
+
+
+
+
+bool MainGame :: checkCollision(ObjLoader *objA, ObjLoader *objB)
+{
+	int flag = 0;
+
+	if (objA->colliderType == 1 && objB->colliderType == 0)
+	{
+		if (fabs(objA->position[0] - objB->position[0]) > (objA->width / 2 + objB->width / 2)) flag = 0;
+		else if (fabs(objA->position[1] - objB->position[1]) > (objA->height / 2 + objB->height / 2)) flag = 0;
+		else if (fabs(objA->position[2] - objB->position[2]) > (objA->depth / 2 + objB->depth / 2)) flag = 0;
+		else flag = 1;
+		if (flag == 1)
+		{
+			objA->velocity[0] *= -1; objA->velocity[1] *= -1; objA->velocity[2] *= -1;
+	
+			return true;
+		}
+
+		else
+			return false;
+	}
+
+	if (objA->colliderType == 1 && objB->colliderType == 1)
+	{
+		if (fabs(objA->position[0] - objB->position[0]) > (objA->width / 2 + objB->width / 2)) flag = 0;
+		else if (fabs(objA->position[1] - objB->position[1]) > (objA->height / 2 + objB->height / 2)) flag = 0;
+		else if (fabs(objA->position[2] - objB->position[2]) > (objA->depth / 2 + objB->depth / 2)) flag = 0;
+		else flag = 1;
+		if (flag == 1)
+		{
+			
+
+			float temp0 = objA->velocity[0];
+			float temp1 = objA->velocity[1];
+			float temp2 = objA->velocity[2];
+			objA->velocity[0] = -1 * objB->velocity[0]; objA->velocity[1] = -1 * objB->velocity[1]; objA->velocity[2] = -1 * objB->velocity[2];
+			objB->velocity[0] = -1 * temp0; objB->velocity[1] = -1 * temp1; objB->velocity[2] = -1 * temp2;
+
+			return true;
+		}
+
+		else
+			return false;
+	}
+
+	else if (objA->colliderType == 2 && objB->colliderType == 0)
+	{
+		double squaredDistance;
+		auto check = [&](
+			const double pn,
+			const double bmin,
+			const double bmax) -> double
+		{
+			double out = 0;
+			double v = pn;
+
+			if (v < bmin)
+			{
+				double val = (bmin - v);
+				out += val * val;
+			}
+
+			if (v > bmax)
+			{
+				double val = (v - bmax);
+				out += val * val;
+			}
+
+			return out;
+		};
+
+		// Squared distance
+		double sq = 0.0;
+
+		sq += check(objA->position[0], objB->point1[0], objB->point8[0]);
+		sq += check(objA->position[1], objB->point1[1], objB->point8[1]);
+		sq += check(objA->position[2], objB->point1[2], objB->point8[2]);
+
+		squaredDistance = sq;
+		if (squaredDistance <= (objA->width * objA->width) == true)
+		{
+			//objA->reverseSpeed();
+			objA->velocity[0] *= -1; objA->velocity[1] *= -1; objA->velocity[2] *= -1;
+
+			objB->velocity[0] *= -1; objB->velocity[1] *= -1; objB->velocity[2] *= -1;
+
+		//	objB->reverseSpeed();
+			
+		}
+		return squaredDistance <= (objA->width * objA->width);
+	}
+
+	else if (objB->colliderType == 2 && objA->colliderType == 0)
+	{
+		double squaredDistance;
+		auto check = [&](
+			const double pn,
+			const double bmin,
+			const double bmax) -> double
+		{
+			double out = 0;
+			double v = pn;
+
+			if (v < bmin)
+			{
+				double val = (bmin - v);
+				out += val * val;
+			}
+
+			if (v > bmax)
+			{
+				double val = (v - bmax);
+				out += val * val;
+			}
+
+			return out;
+		};
+
+		// Squared distance
+		double sq = 0.0;
+
+		sq += check(objB->position[0], objA->point1[0], objA->point8[0]);
+		sq += check(objB->position[1], objA->point1[1], objA->point8[1]);
+		sq += check(objB->position[2], objA->point1[2], objA->point8[2]);
+
+		squaredDistance = sq;
+		if (squaredDistance <= (objB->width * objB->width) == true)
+		{ 
+		
+			objA->velocity[0] *= -1; objA->velocity[1] *= -1; objA->velocity[2] *= -1;
+
+			objB->velocity[0] *= -1; objB->velocity[1] *= -1; objB->velocity[2] *= -1;
+		}
+		return squaredDistance <= (objB->width * objB->width);
+	}
+
+	else
+		return false;
 }

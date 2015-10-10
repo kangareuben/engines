@@ -1,8 +1,9 @@
 #pragma once
 #include <math.h>
 #include <iostream>
-#include <SDL.h>
-#include <glew.h>
+#include <SDL/SDL.h>
+#include <GL/glew.h>
+#include "ObjLoader.h"
 using namespace std;
 class Camera
 {
@@ -18,6 +19,7 @@ public:
 	float camX, camY, camZ,camYaw,camPitch;
 	bool mouseIn;
 	void updateCamera();
+	ObjLoader player;
 	float PI = 3.1415926535;
 };
 
