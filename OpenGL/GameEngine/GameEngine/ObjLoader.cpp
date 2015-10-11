@@ -181,7 +181,7 @@ void ObjLoader::Draw()
 	glVertexPointer(3, GL_FLOAT, 0, ptr_facesTriangles);
 	glNormalPointer(GL_FLOAT, 0, ptr_normals);
 	glTranslatef(position[0], position[1], position[2]);
-
+	cout << position[0] << position[1] << position[2] << endl;
 
 	
 	glDrawArrays(GL_TRIANGLES, 0, _totalConnectedTriangles);
@@ -216,6 +216,7 @@ void ObjLoader::update(float dt)
 	}
 
 	position[0] += velocity[0] * dt;
+	position[1] += velocity[1] * dt;
 	position[2] += velocity[2] * dt;
 }
 

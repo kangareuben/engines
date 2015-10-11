@@ -3,14 +3,17 @@
 #include "iostream"
 #include "ObjLoader.h"
 #include <boost/thread/thread.hpp>
-double alpha = 0.0f;
-bool j;
-bool k;
-bool l;
+#include <random>
+
+
+
+
+
 float t = 0.0f;
 using namespace std;
 double accumulator = 0.0;
 float dt =0.0f;
+float ti;
 // 0 - ground
 // 1 - box 
 // 2 - sphere
@@ -96,16 +99,42 @@ void MainGame::initSystems()
 
 void MainGame::run()
 {
+	
 	initSystems();
 	//file path,initial x, initial y, initial z, gravity true or false, colliderType, width,height,depth,mass
 	obj.load("Models/Box.obj",2,20,20,true,1,1,1,1,1);
 	obj2.load("Models/Sphere.obj",-2,20,20,true,2,1,1,1,2);
-	obj3.load("Models/Terrain.obj", 0,0,0,false,0,200, 1,200,1000);
-	box1.load("Models/Box.obj", 2, 10, 20, true, 1, 1, 1, 1,2);
+	obj3.load("Models/Terrain.obj", 0,0,0,false,0,200, 0.001,200,1000);
+	box1.load("Models/Box.obj", 2, 10, 20, false, 1, 1, 1, 1,2);
 	box2.load("Models/Box.obj", 10, 0, 20, true, 1, 1, 1, 1,3);
 	box3.load("Models/Box.obj", -10, 0, 20, true, 1, 1, 1, 1,4);
 	box2.setVelocity(-0.1f, 0, 0);
 	box3.setVelocity(0.1f, 0, 0);
+
+	std::random_device rd;
+	std::mt19937 mt(rd());
+	std::uniform_real_distribution<double> dist(-0.05f, 0.05f);
+	
+//	for (int i = 0; i<16; ++i)
+	//	std::cout << dist(mt) << "\n";
+
+	for (int i = 0; i < 50; i++)
+	{
+		particles[i].load("Models/Particle.obj", 0, 0, 0, false, 5, 0.001f, 0.001f, 0.001f, 0.1f);
+		
+	//	cout << particles[i].position[0] << " " << particles[i].position[1] << " " << particles[i].position[2] << endl;
+	}
+	for (int i = 0; i < 50; i++)
+	{
+		float x, y, z;
+		x = dist(mt);
+		y = dist(mt);
+		z = dist(mt);
+		//if (y < 0)
+		//	y *= -1;
+		particles[i].setVelocity(x, y, z);
+		cout << x << " " << y << " " << z << endl;
+	}
 	gameLoop();
 }
 
@@ -152,7 +181,10 @@ void MainGame::gameLoop()
 			box1.update(deltaTime);
 			box2.update(deltaTime);
 			box3.update(deltaTime);
-
+			for (int i = 0; i < 500; i++)
+			{
+				particles[i].update(deltaTime);
+			}
 			i++;
 			dt -= deltaTime;
 		}
@@ -289,6 +321,13 @@ void MainGame::draw()
 	box3.Draw();
 	glPopMatrix();
 
+
+	ti = SDL_GetTicks();
+	glPushMatrix();
+	if (ti/1000.0f<5)
+	for (int i = 0; i < 50; i++)
+		particles[i].Draw();
+	glPopMatrix();
 	SDL_GL_SwapWindow(ptr_window);
 
 }
@@ -391,7 +430,8 @@ bool MainGame :: checkCollision(ObjLoader *objA, ObjLoader *objB)
 		else flag = 1;
 		if (flag == 1)
 		{
-			
+		//	float m1 = objA->mass / (objA->mass + objB->mass);
+		//	float m1 = objA->mass / (objA->mass + objB->mass);
 
 			float temp0 = objA->velocity[0];
 			float temp1 = objA->velocity[1];

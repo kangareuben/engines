@@ -28,6 +28,7 @@ public:
 	ObjLoader box1;
 	ObjLoader box2;
 	ObjLoader box3;
+	ObjLoader particles[500];
 	ObjLoader player;
 	Camera mainCam;
 	ObjLoader cam;
