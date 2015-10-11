@@ -113,27 +113,23 @@ void MainGame::run()
 
 	std::random_device rd;
 	std::mt19937 mt(rd());
-	std::uniform_real_distribution<double> dist(-0.05f, 0.05f);
+	std::uniform_real_distribution<double> dist(-0.1f, 0.1f);
+	std::uniform_real_distribution<double> dist2(0.001f, 0.005f);
+
 	
-//	for (int i = 0; i<16; ++i)
-	//	std::cout << dist(mt) << "\n";
 
 	for (int i = 0; i < 50; i++)
 	{
 		particles[i].load("Models/Particle.obj", 0, 0, 0, false, 5, 0.001f, 0.001f, 0.001f, 0.1f);
-		
-	//	cout << particles[i].position[0] << " " << particles[i].position[1] << " " << particles[i].position[2] << endl;
 	}
 	for (int i = 0; i < 50; i++)
 	{
 		float x, y, z;
 		x = dist(mt);
-		y = dist(mt);
+		y = dist2(mt);
 		z = dist(mt);
-		//if (y < 0)
-		//	y *= -1;
+		
 		particles[i].setVelocity(x, y, z);
-		cout << x << " " << y << " " << z << endl;
 	}
 	gameLoop();
 }
