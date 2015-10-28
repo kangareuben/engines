@@ -1,13 +1,8 @@
 #include "MainGame.h"
 #include "Errors.h"
 #include "iostream"
-#include "ObjLoader.h"
 #include <boost/thread/thread.hpp>
 #include <random>
-
-
-
-
 
 float t = 0.0f;
 using namespace std;
@@ -34,12 +29,12 @@ MainGame::MainGame()
 	_maxFPS = 60;
 	_mouseVel = 0.2f;
 	_moveVel = 0.2f;
+	mapIndex = 0;
 }
 
 
 MainGame::~MainGame()
 {
-
 }
 
 void MainGame::initSystems()
@@ -94,7 +89,6 @@ void MainGame::initSystems()
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_LIGHTING);
 	glEnable(GL_LIGHT0);
-
 }
 
 void MainGame::run()
@@ -102,15 +96,16 @@ void MainGame::run()
 	
 	initSystems();
 	//file path,initial x, initial y, initial z, gravity true or false, colliderType, width,height,depth,mass
-	obj.load("Models/Box.obj",2,20,20,true,1,1,1,1,1);
-	obj2.load("Models/Sphere.obj",-2,20,20,true,2,1,1,1,2);
-	obj3.load("Models/Terrain.obj", 0,0,0,false,0,200, 0.001,200,1000);
-	box1.load("Models/Box.obj", 2, 10, 20, false, 1, 1, 1, 1,2);
-	box2.load("Models/Box.obj", 10, 0, 20, true, 1, 1, 1, 1,3);
-	box3.load("Models/Box.obj", -10, 0, 20, true, 1, 1, 1, 1,4);
-	box2.setVelocity(-0.1f, 0, 0);
-	box3.setVelocity(0.1f, 0, 0);
+	createObject("Models/box.obj", 2, 20, 20, 1, 1, 1, 1, true, 1);
+	createObject("Models/sphere.obj", -2, 20, 20, 1, 1, 1, 2, true, 2);
+	createObject("Models/Terrain.obj", 0, 0, 0, 200, 0.001f, 200, 1000, false, 0);
+	createObject("Models/box.obj", 2, 10, 20, 1, 1, 1, 2, false, 1);
+	createObject("Models/box.obj", 10, 0, 20, 1, 1, 1, 3, true, 1);
+	objMap.at(mapIndex - 1)->physics->setVelocity(-0.1f, 0, 0);
+	createObject("Models/box.obj", -10, 0, 20, 1, 1, 1, 4, true, 1);
+	objMap.at(mapIndex - 1)->physics->setVelocity(0.1f, 0, 0);
 
+	
 	std::random_device rd;
 	std::mt19937 mt(rd());
 	std::uniform_real_distribution<double> dist(-0.1f, 0.1f);
@@ -120,17 +115,15 @@ void MainGame::run()
 
 	for (int i = 0; i < 50; i++)
 	{
-		particles[i].load("Models/Particle.obj", 0, 0, 0, false, 5, 0.001f, 0.001f, 0.001f, 0.1f);
-	}
-	for (int i = 0; i < 50; i++)
-	{
+		createObject("Models/Particle.obj", 0, 0, 0, 0.001f, 0.001f, 0.001f, 0.1f, false, 5);
 		float x, y, z;
 		x = dist(mt);
 		y = dist2(mt);
 		z = dist(mt);
-		
-		particles[i].setVelocity(x, y, z);
+
+		objMap.at(mapIndex - 1)->physics->setVelocity(x, y, z);
 	}
+
 	gameLoop();
 }
 
@@ -156,6 +149,7 @@ void MainGame::gameLoop()
 		dt = frameTime / DESIRED_FRAMETIME;
 	
 		int i = 0;
+
 		while (dt>0.0f && i <MAX_PHYSICS_STEPS )
 		{
 			float deltaTime;
@@ -166,21 +160,38 @@ void MainGame::gameLoop()
 			else
 				deltaTime = MAX_DELTA_TIME;
 
+			for (int j = 0; j < mapIndex; j++)
+			{
+				if (objMap.at(j)->physics->colliderType != 5)
+				{
+					for (int k = j + 1; k < mapIndex; k++)
+					{
+						if (objMap.at(k)->physics->colliderType != 5)
+						{
+							checkCollision(objMap.at(j)->physics, objMap.at(k)->physics);
+						}
+					}
+				}
+			}
 
-			checkCollision(&obj, &obj3);
-			checkCollision(&obj2, &obj3);
-			checkCollision(&obj, &box1);
-			checkCollision(&box1, &obj3);
-			checkCollision(&box2, &box3);
-			obj.update(deltaTime);
-		 	obj2.update(deltaTime);
-			box1.update(deltaTime);
-			box2.update(deltaTime);
-			box3.update(deltaTime);
+			for (int j = 0; j < mapIndex; j++)
+			{
+				objMap.at(j)->physics->update(deltaTime);
+			}
+			/*checkCollision(&obj.physics, &obj3.physics);
+			checkCollision(&obj2.physics, &obj3.physics);
+			checkCollision(&obj.physics, &box1.physics);
+			checkCollision(&box1.physics, &obj3.physics);
+			checkCollision(&box2.physics, &box3.physics);
+			obj.physics.update(deltaTime);
+			obj2.physics.update(deltaTime);
+			box1.physics.update(deltaTime);
+			box2.physics.update(deltaTime);
+			box3.physics.update(deltaTime);
 			for (int i = 0; i < 500; i++)
 			{
-				particles[i].update(deltaTime);
-			}
+				particles[i].physics.update(deltaTime);
+			}*/
 			i++;
 			dt -= deltaTime;
 		}
@@ -293,28 +304,35 @@ void MainGame::draw()
 	gluLookAt(0, 1, 25, 0, 0, 0, 0, 1, 0);
 	glTranslatef(mainCam.camX*-1, mainCam.camY*-1, mainCam.camZ*-1);
 
-	glPushMatrix();
-	obj.Draw();
+	for (int i = 0; i < mapIndex; i++)
+	{
+		glPushMatrix();
+		objMap.at(i)->Draw(objMap.at(i)->physics);
+		glPopMatrix();
+	}
+
+	/*glPushMatrix();
+	obj.model.Draw();
 	glPopMatrix();
 
 	glPushMatrix();
-	obj2.Draw();
+	obj2.model.Draw();
 	glPopMatrix();
 	
 	glPushMatrix();
-	obj3.Draw();
+	obj3.model.Draw();
 	glPopMatrix();
 
 	glPushMatrix();
-	box1.Draw();
+	box1.model.Draw();
 	glPopMatrix();
 
 	glPushMatrix();
-	box2.Draw();
+	box2.model.Draw();
 	glPopMatrix();
 
 	glPushMatrix();
-	box3.Draw();
+	box3.model.Draw();
 	glPopMatrix();
 
 
@@ -322,8 +340,8 @@ void MainGame::draw()
 	glPushMatrix();
 	if (ti/1000.0f<5)
 	for (int i = 0; i < 50; i++)
-		particles[i].Draw();
-	glPopMatrix();
+		particles[i].model.Draw();
+	glPopMatrix();*/
 	SDL_GL_SwapWindow(ptr_window);
 
 }
@@ -378,26 +396,7 @@ void MainGame::calculateFPS()
 	}
 }
 
-int main(int argc, char **argv)
-{
-	MainGame mainGame;
-/*	boost::thread thrd1(&fn1);
-	boost::thread thrd2(&fn2);
-	boost::thread thrd3(&fn3);
-	thrd1.join();
-	thrd2.join();
-	thrd3.join();
-*/
-	mainGame.run();
-
-	return 0;
-}
-
-
-
-
-
-bool MainGame :: checkCollision(ObjLoader *objA, ObjLoader *objB)
+bool MainGame :: checkCollision(ObjPhysics *objA, ObjPhysics *objB)
 {
 	int flag = 0;
 
@@ -486,6 +485,7 @@ bool MainGame :: checkCollision(ObjLoader *objA, ObjLoader *objB)
 		//	objB->reverseSpeed();
 			
 		}
+		cout << "squaredDistance = " << squaredDistance << "    width squared = " << objA->width * objA->width << endl;
 		return squaredDistance <= (objA->width * objA->width);
 	}
 
@@ -535,4 +535,21 @@ bool MainGame :: checkCollision(ObjLoader *objA, ObjLoader *objB)
 
 	else
 		return false;
+}
+
+void MainGame::createObject(char* fileName, float x, float y, float z, float width, float height, float depth, float mass, bool hasGravity, int colliderType)
+{
+	Object* obj = new Object();
+	obj->setIndex(mapIndex);
+	ObjLoader* model = new ObjLoader();
+	model->load(fileName);
+
+	obj->setModel(model);
+
+	ObjPhysics* physics = new ObjPhysics(x, y, z, width, height, depth, mass, hasGravity, colliderType);
+
+	obj->setPhysics(physics);
+
+	objMap.insert(pair<int, Object*>(mapIndex, obj));
+	mapIndex++;
 }
