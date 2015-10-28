@@ -1,9 +1,13 @@
 #pragma once
-#include <SDL.h>
-#include <glew.h>
-#include "ObjLoader.h"
+#include <SDL/SDL.h>
+#include <GL/glew.h>
 #include "Camera.h"
-
+#include "Object.h"
+#include <time.h>
+#include <ctime>
+#include <algorithm>
+#include <vector>
+#include <map>
 enum class GameState { PLAY, EXIT };
 
 class MainGame
@@ -18,10 +22,23 @@ public:
 	void processInput();
 	void mouseLook(int, int);
 	GameState _gameState;
-	ObjLoader obj;
-	ObjLoader obj2;
+	double currentTime;
+	bool checkCollision(ObjPhysics*,ObjPhysics*);
+
+	map<int, Object*> objMap;
+	int mapIndex;
+
+	//Object obj;
+	//Object obj2;
+	//Object obj3;
+	//Object box1;
+	//Object box2;
+	//Object box3;
+	//Object particles[500];
+
+	Object player;
 	Camera mainCam;
-	ObjLoader cam;
+	Object cam;
 	float _xDist;
 	float _yDist;
 	float _zDist;
@@ -32,6 +49,7 @@ public:
 	int _windowHeight;
 	int _windowWidth;
 	void calculateFPS();
+	void createObject(char*, float, float, float, float, float, float, float, bool, int);
 
 private:
 	SDL_Window *ptr_window;

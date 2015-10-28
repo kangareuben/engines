@@ -1,20 +1,16 @@
 #include "ObjLoader.h"
-#include <math.h>
-#include <vector>
-#include <string>
-#include <fstream>
-#include "Errors.h"
-#include <SDL.h>
-#include <glew.h>
+#include "ObjPhysics.h"
+//#include "Object.h"
+
+float a[16];
+
 using namespace std;
 ObjLoader::ObjLoader()
 {
 	this->_totalConnectedPoints = 0;
 	this->_totalConnectedTriangles = 0;
+	
 }
-
-
-
 
 float *ObjLoader::calculateNormal(float *ptr_coord1, float *ptr_coord2, float *ptr_coord3)
 {
@@ -47,6 +43,7 @@ float *ObjLoader::calculateNormal(float *ptr_coord1, float *ptr_coord2, float *p
 
 int ObjLoader::load(char *fileName)
 {
+	
 	string line;
 	ifstream objFile(fileName);
 	if (objFile.is_open())
@@ -143,14 +140,18 @@ void ObjLoader::Release()
 	free(this->ptr_vertexBuffer);
 }
 
-void ObjLoader::Draw()
+void ObjLoader::Draw(ObjPhysics* pPhysics, int objIndex)
 {
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_NORMAL_ARRAY);
 	glVertexPointer(3, GL_FLOAT, 0, ptr_facesTriangles);
 	glNormalPointer(GL_FLOAT, 0, ptr_normals);
+	glTranslatef(pPhysics->position[0], pPhysics->position[1], pPhysics->position[2]);
+	//cout << position[0] << position[1] << position[2] << endl;
+
+	
 	glDrawArrays(GL_TRIANGLES, 0, _totalConnectedTriangles);
+	
 	glDisableClientState(GL_VERTEX_ARRAY);
 	glDisableClientState(GL_NORMAL_ARRAY);
-
 }
