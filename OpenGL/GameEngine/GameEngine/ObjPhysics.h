@@ -7,7 +7,7 @@ class ObjPhysics
 {
 public:
 	ObjPhysics();
-	ObjPhysics(float, float, float, float, float, float, float, bool, int);
+	ObjPhysics(float, float, float, float, float, float, float, float, float, float, bool, int);
 	~ObjPhysics();
 
 	void update(float);
