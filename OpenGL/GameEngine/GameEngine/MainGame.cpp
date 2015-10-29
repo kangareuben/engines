@@ -53,6 +53,13 @@ void g_fnPhysicsThread()
 						if (g_pMainGame->objMap.at(k)->physics->colliderType != 5)
 						{
 							g_pMainGame->checkCollision(g_pMainGame->objMap.at(j)->physics, g_pMainGame->objMap.at(k)->physics);
+
+							//This was an attempt to use multiple threads per frame for collision detection
+							//It didn't work because too many threads were created and the performance went down
+							/*boost::thread CheckCollisionThread(	&MainGame::checkCollision,	
+																g_pMainGame, 
+																g_pMainGame->objMap.at(j)->physics, 
+																g_pMainGame->objMap.at(k)->physics);*/
 						}
 					}
 				}
@@ -196,18 +203,6 @@ void MainGame::run()
 	op = new ObjParams();
 	op->setObjParams("Models/box.obj", -10, 0, 20, 1, 1, 1, 4, 0.1f, 0, 0, true, 1);
 	boost::thread t6(&g_fnCreateObject, op);
-
-
-
-	/*createObject("Models/box.obj", 2, 20, 20, 1, 1, 1, 1, true, 1);
-	createObject("Models/sphere.obj", -2, 20, 20, 1, 1, 1, 2, true, 2);
-	createObject("Models/Terrain.obj", 0, 0, 0, 200, 0.001f, 200, 1000, false, 0);
-	createObject("Models/box.obj", 2, 10, 20, 1, 1, 1, 2, false, 1);
-	createObject("Models/box.obj", 10, 0, 20, 1, 1, 1, 3, true, 1);
-	objMap.at(mapIndex - 1)->physics->setVelocity(-0.1f, 0, 0);
-	createObject("Models/box.obj", -10, 0, 20, 1, 1, 1, 4, true, 1);
-	objMap.at(mapIndex - 1)->physics->setVelocity(0.1f, 0, 0);*/
-
 	
 	std::random_device rd;
 	std::mt19937 mt(rd());
