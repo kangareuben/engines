@@ -111,6 +111,7 @@ MainGame::MainGame()
 	g_pMainGame = this;
 	bIsLoaded = false;
 	nLoadThreadCount = 0;
+	gravityEnabled = true;
 }
 
 
@@ -333,6 +334,29 @@ void MainGame::processInput()
 
 				case SDLK_d:
 					mainCam.moveCamera(_moveVel, 270);
+					break;
+
+				//Simple user interaction
+				//Presss g and gravity is toggled
+				case SDLK_g:
+					if (gravityEnabled)
+					{
+						gravityEnabled = false;
+						for (int i = 0; i < mapIndex; i++)
+						{
+							objMap.at(i)->physics->gravity = false;
+							objMap.at(i)->physics->gravityAcceleration = 0.0f;
+						}
+					}
+					else
+					{
+						gravityEnabled = true;
+						for (int i = 0; i < mapIndex; i++)
+						{
+							objMap.at(i)->physics->gravity = true;
+							objMap.at(i)->physics->gravityAcceleration = 0.01f;
+						}
+					}
 					break;
 			}
 		}

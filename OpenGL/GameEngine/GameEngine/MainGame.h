@@ -58,6 +58,7 @@ public:
 	void mouseLook(int, int);
 	GameState _gameState;
 	double currentTime;
+	bool gravityEnabled;
 	bool checkCollision(ObjPhysics*,ObjPhysics*);
 
 	map<int, Object*> objMap;
