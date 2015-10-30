@@ -13,7 +13,8 @@ ObjPhysics::ObjPhysics()
 	velocity.push_back(0);
 }
 
-ObjPhysics::ObjPhysics(float p_x, float p_y, float p_z, float p_width, float p_height, float p_depth, float p_mass, bool p_gravity, int p_colliderType)
+ObjPhysics::ObjPhysics(float p_x, float p_y, float p_z, float p_width, float p_height, float p_depth, float p_mass,
+					   float p_xVelo, float p_yVelo, float p_zVelo, bool p_gravity, int p_colliderType)
 {
 	gravityAcceleration = 0.01f;
 	position.push_back(0);
@@ -33,6 +34,8 @@ ObjPhysics::ObjPhysics(float p_x, float p_y, float p_z, float p_width, float p_h
 	width = p_width;
 	height = p_height;
 	depth = p_depth;
+
+	setVelocity(p_xVelo, p_yVelo, p_zVelo);
 
 	/*point1[0] = position[0] - width / 2; point1[1] = position[1] - height / 2; point1[2] = position[2] - depth / 2;
 	point2[0] = position[0] + width / 2; point2[1] = position[1] - height / 2; point2[2] = position[2] - depth / 2;
