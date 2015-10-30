@@ -184,9 +184,9 @@ void MainGame::run()
 	op->setObjParams("Models/box.obj", 2, 20, 20, 1, 1, 1, 1, 0, 0, 0, true, 1);
 	boost::thread t1(&g_fnCreateObject, op);
 
-	op = new ObjParams();
+	/*op = new ObjParams();
 	op->setObjParams("Models/sphere.obj", -2, 20, 20, 1, 1, 1, 2, 0, 0, 0, true, 2);
-	boost::thread t2(&g_fnCreateObject, op);
+	boost::thread t2(&g_fnCreateObject, op);*/
 
 	op = new ObjParams();
 	op->setObjParams("Models/Terrain.obj", 0, 0, 0, 200, 0.001f, 200, 1000, 0, 0, 0, false, 0);
