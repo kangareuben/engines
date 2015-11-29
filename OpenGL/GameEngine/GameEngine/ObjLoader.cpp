@@ -1,16 +1,20 @@
 #include "ObjLoader.h"
-#include "ObjPhysics.h"
-//#include "Object.h"
-
-float a[16];
-
+#include <math.h>
+#include <vector>
+#include <string>
+#include <fstream>
+#include "Errors.h"
+#include <SDL2/SDL.h>
+#include <GL/glew.h>
 using namespace std;
 ObjLoader::ObjLoader()
 {
 	this->_totalConnectedPoints = 0;
 	this->_totalConnectedTriangles = 0;
-	
 }
+
+
+
 
 float *ObjLoader::calculateNormal(float *ptr_coord1, float *ptr_coord2, float *ptr_coord3)
 {
@@ -43,7 +47,6 @@ float *ObjLoader::calculateNormal(float *ptr_coord1, float *ptr_coord2, float *p
 
 int ObjLoader::load(char *fileName)
 {
-	
 	string line;
 	ifstream objFile(fileName);
 	if (objFile.is_open())
@@ -72,7 +75,7 @@ int ObjLoader::load(char *fileName)
 				line[0] = ' ';
 
 				//Reads value from v x y z
-				sscanf_s(line.c_str(), "%f%f%f ", &ptr_vertexBuffer[_totalConnectedPoints],
+				sscanf(line.c_str(), "%f%f%f ", &ptr_vertexBuffer[_totalConnectedPoints],
 					&ptr_vertexBuffer[_totalConnectedPoints + 1],
 					&ptr_vertexBuffer[_totalConnectedPoints + 2]);
 
@@ -84,7 +87,7 @@ int ObjLoader::load(char *fileName)
 			{
 				line[0] = ' ';
 				int vertexNumer[4] = { 0, 0, 0 };
-				sscanf_s(line.c_str(), "%i%i%i", &vertexNumer[0], &vertexNumer[1], &vertexNumer[2]);
+				sscanf(line.c_str(), "%i%i%i", &vertexNumer[0], &vertexNumer[1], &vertexNumer[2]);
 
 				vertexNumer[0] -= 1;
 				vertexNumer[1] -= 1;
@@ -140,18 +143,14 @@ void ObjLoader::Release()
 	free(this->ptr_vertexBuffer);
 }
 
-void ObjLoader::Draw(ObjPhysics* pPhysics, int objIndex)
+void ObjLoader::Draw()
 {
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_NORMAL_ARRAY);
 	glVertexPointer(3, GL_FLOAT, 0, ptr_facesTriangles);
 	glNormalPointer(GL_FLOAT, 0, ptr_normals);
-	glTranslatef(pPhysics->position[0], pPhysics->position[1], pPhysics->position[2]);
-	//cout << position[0] << position[1] << position[2] << endl;
-
-	
 	glDrawArrays(GL_TRIANGLES, 0, _totalConnectedTriangles);
-	
 	glDisableClientState(GL_VERTEX_ARRAY);
 	glDisableClientState(GL_NORMAL_ARRAY);
+
 }
