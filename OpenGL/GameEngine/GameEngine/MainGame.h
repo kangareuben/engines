@@ -1,10 +1,12 @@
 #pragma once
-#include <SDL2/SDL.h>
+#include <SDL.h>
 #include <GL/glew.h>
 #include "ObjLoader.h"
 #include "Camera.h"
-#include "MainGame.h"
+//#include "MainGame.h"
 #include "Network.h"
+#include "ALFramework.h"
+#include "AudioManager.h"
 class MainGame
 {
 public:
@@ -32,6 +34,7 @@ public:
 	int _windowHeight;
 	int _windowWidth;
 	void calculateFPS();
+	AudioManager* audioManager;
 
 private:
 	SDL_Window *ptr_window;

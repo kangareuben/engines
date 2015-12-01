@@ -98,6 +98,16 @@ void MainGame::initSystems()
 	glEnable(GL_LIGHTING);
 	glEnable(GL_LIGHT0);
 
+	//Set up OpenAL
+	ALFWInit();
+	if (!ALFWInitOpenAL())
+	{
+		ALFWprintf("Failed to initialize OpenAL\n");
+		ALFWShutdown();
+	}
+
+	audioManager = new AudioManager();
+
 	if(isOnline)
         net = new Network(ip);
 
@@ -109,10 +119,10 @@ void MainGame::run()
 	obj.load("Models/Docahedron.obj");
 	obj2.load("Models/Docahedron.obj");
 
-	BoundingSphere sphere1(Vector3f(10.0f,0.0f,0.0f),1.0f);
-    BoundingSphere sphere2(Vector3f(0.0f,3.0f,0.0f),1.0f);
-	BoundingSphere sphere3(Vector3f(0.0f,0.0f,2.0f),1.0f);
-	BoundingSphere sphere4(Vector3f(1.0f,0.0f,0.0f),1.0f);
+//	BoundingSphere sphere1(Vector3f(10.0f,0.0f,0.0f),1.0f);
+ //   BoundingSphere sphere2(Vector3f(0.0f,3.0f,0.0f),1.0f);
+//	BoundingSphere sphere3(Vector3f(0.0f,0.0f,2.0f),1.0f);
+//	BoundingSphere sphere4(Vector3f(1.0f,0.0f,0.0f),1.0f);
 /*
 	IntersectData sphereIntersectSphere2 = sphere1.IntersectBoundingSphere(sphere2);
     IntersectData sphereIntersectSphere3 = sphere1.IntersectBoundingSphere(sphere3);
@@ -201,6 +211,13 @@ void MainGame::gameLoop()
 			SDL_Delay(1000.0f / _maxFPS - _frameTicks);
 		}
 	}
+
+	//Clean up OpenAL
+	audioManager->Cleanup();
+
+	ALFWShutdownOpenAL();
+	ALFWShutdown();
+	delete audioManager;
 }
 
 
@@ -287,7 +304,14 @@ void MainGame::processInput()
 			case SDLK_d:
 				mainCam.moveCamera(_moveVel, 270);
 				break;
-
+				
+			//Press q to play a sound
+			case SDLK_q:
+				ALfloat position[3] = { 500000, 500000, 500000 };
+				ALfloat velocity[3] = { 0, 0, 0 };
+				ALfloat orientation[6] = { 1, 0, 0, 0, 1, 0 };
+				audioManager->Play("thud.wav", position, velocity, orientation);
+				break;
 
 			}
 
