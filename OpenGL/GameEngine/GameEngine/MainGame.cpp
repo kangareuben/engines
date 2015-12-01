@@ -7,13 +7,11 @@
 #include "plane.h"
 #include "physicsObject.h"
 #include "physicsEngine.h"
+using namespace std;
+
 enum GameState { PLAY, EXIT };
 PhysicsEngine physicsEngine;
 GameState _gameState;
-
-
-
-using namespace std;
 char ip[20];
 
 MainGame::MainGame()
@@ -90,13 +88,32 @@ void MainGame::initSystems()
 
 	GLfloat amb_light[] = { 0.1, 0.1, 0.1, 1.0 };
 	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, amb_light);
-	glEnable(GL_LIGHT0);
+	//glEnable(GL_LIGHT0);
 	glEnable(GL_COLOR_MATERIAL);
 	glShadeModel(GL_SMOOTH);
 	glDepthFunc(GL_LEQUAL);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_LIGHTING);
 	glEnable(GL_LIGHT0);
+
+	//Lighting test
+	GLfloat ambient1[] = { 0.2, 0.5, 0.3, 1.0 };
+	glLightfv(GL_LIGHT1, GL_AMBIENT, ambient1);
+	GLfloat diffuse1[] = { 0.1, 0.1, 0.1, 1.0 };
+	glLightfv(GL_LIGHT1, GL_DIFFUSE, diffuse1);
+	GLfloat specular1[] = { 0.1, 0.1, 0.1, 1.0 };
+	glLightfv(GL_LIGHT1, GL_SPECULAR, specular1);
+	/*GLfloat position1[] = { 0, 50, 0, 1.0 };
+	glLightfv(GL_LIGHT1, GL_POSITION, position1);
+	GLfloat direction1[] = { 0, -1, 0 };
+	glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, direction1);
+	GLfloat cutoff1 = 10;
+	glLightfv(GL_LIGHT1, GL_SPOT_CUTOFF, &cutoff1);*/
+	glEnable(GL_LIGHT1);
+
+	/*GLfloat ambient2[] = { 0.5, 0.3, 0.2, 1.0 };
+	glLightfv(GL_LIGHT2, GL_AMBIENT, ambient2);
+	glEnable(GL_LIGHT2);*/
 
 	//Set up OpenAL
 	ALFWInit();
@@ -166,16 +183,8 @@ void MainGame::run()
 
 */
 
-
    physicsEngine.AddObject(PhysicsObject(new BoundingSphere(Vector3f(10,1.5,0),1),Vector3f(-2,0,0)));
    physicsEngine.AddObject(PhysicsObject(new BoundingSphere(Vector3f(-10,0,0),1),Vector3f(1,0,0)));
-
-
-
-
-
-
-
 
 	gameLoop();
 }
@@ -314,9 +323,6 @@ void MainGame::processInput()
 				break;
 
 			}
-
-
-
 		}
 	}
 }
