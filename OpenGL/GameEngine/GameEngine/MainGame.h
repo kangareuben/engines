@@ -44,4 +44,5 @@ private:
 	float _maxFPS;
 	float _moveVel;
 	float _mouseVel;
+	GLfloat* ambient1;
 };

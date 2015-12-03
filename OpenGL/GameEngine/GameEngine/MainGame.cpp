@@ -97,7 +97,11 @@ void MainGame::initSystems()
 	glEnable(GL_LIGHT0);
 
 	//Lighting test
-	GLfloat ambient1[] = { 0.2, 0.5, 0.3, 1.0 };
+	ambient1 = new GLfloat[4];
+	ambient1[0] = 0.2;
+	ambient1[1] = 0.5;
+	ambient1[2] = 0.3;
+	ambient1[3] = 1.0;
 	glLightfv(GL_LIGHT1, GL_AMBIENT, ambient1);
 	GLfloat diffuse1[] = { 0.1, 0.1, 0.1, 1.0 };
 	glLightfv(GL_LIGHT1, GL_DIFFUSE, diffuse1);
@@ -219,6 +223,17 @@ void MainGame::gameLoop()
 		{
 			SDL_Delay(1000.0f / _maxFPS - _frameTicks);
 		}
+
+		for (int i = 0; i < 3; i++)
+		{
+			//ambient1[i] += (((float)rand()) / RAND_MAX * 2 - 1) / 5;
+			ambient1[i] += ((float)rand()) / RAND_MAX * .02;
+			if (ambient1[i] >= 1.0)
+			{
+				ambient1[i] = 0.0;
+			}
+		}
+		glLightfv(GL_LIGHT1, GL_AMBIENT, ambient1);
 	}
 
 	//Clean up OpenAL
@@ -227,6 +242,9 @@ void MainGame::gameLoop()
 	ALFWShutdownOpenAL();
 	ALFWShutdown();
 	delete audioManager;
+
+	//Clean up lighting
+	delete[] ambient1;
 }
 
 
@@ -269,8 +287,6 @@ void MainGame::processInput()
 			mouseIn = true;
 			SDL_ShowCursor(SDL_DISABLE);
 			break;
-
-
 
 		case SDL_KEYDOWN:
 			switch (evnt.key.keysym.sym)
