@@ -38,7 +38,7 @@ public:
 	void HandleCollisions();
 
 	//TODO: Temporary Getters
-	inline const PhysicsObject& GetObject(unsigned int index) const
+	inline  PhysicsObject& GetObject(unsigned int index) 
 	{
 		return m_objects[index];
 	}

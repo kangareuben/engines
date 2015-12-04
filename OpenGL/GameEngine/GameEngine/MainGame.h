@@ -7,6 +7,7 @@
 #include "Network.h"
 #include "ALFramework.h"
 #include "AudioManager.h"
+#include <AntTweakBar.h>
 #include "ObjAI.h"
 
 #define UNIT_LENGTH 10
@@ -50,4 +51,5 @@ private:
 	float _moveVel;
 	float _mouseVel;
 	GLfloat* ambient1;
+    TwBar* twBar;
 };

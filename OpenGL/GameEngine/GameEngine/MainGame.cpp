@@ -115,9 +115,21 @@ void MainGame::initSystems()
 	glLightfv(GL_LIGHT1, GL_SPOT_CUTOFF, &cutoff1);*/
 	glEnable(GL_LIGHT1);
 
-	/*GLfloat ambient2[] = { 0.5, 0.3, 0.2, 1.0 };
+	GLfloat ambient2[] = { 0.5, 0.3, 0.2, 1.0 };
 	glLightfv(GL_LIGHT2, GL_AMBIENT, ambient2);
-	glEnable(GL_LIGHT2);*/
+	//glEnable(GL_LIGHT2);
+
+	GLfloat ambient3[] = { 0.2, 0.3, 0.5, 1.0 };
+	glLightfv(GL_LIGHT3, GL_AMBIENT, ambient3);
+
+	GLfloat ambient4[] = { 0.5, 0.5, 0.2, 1.0 };
+	glLightfv(GL_LIGHT4, GL_AMBIENT, ambient4);
+
+	GLfloat ambient5[] = { 0.5, 0.2, 0.5, 1.0 };
+	glLightfv(GL_LIGHT5, GL_AMBIENT, ambient5);
+
+	GLfloat ambient6[] = { 0.8, 0.2, 0.4, 1.0 };
+	glLightfv(GL_LIGHT6, GL_AMBIENT, ambient6);
 
 	//Set up OpenAL
 	ALFWInit();
@@ -129,11 +141,60 @@ void MainGame::initSystems()
 
 	audioManager = new AudioManager();
 
+    //Set up AntTweakBar
+    TwInit(TW_OPENGL, NULL);
+	TwWindowSize(320, 160);
+	
+	void TW_CALL toggleLight1(void* clientData);
+	void TW_CALL toggleLight2(void* clientData);
+	void TW_CALL toggleLight3(void* clientData);
+
+	twBar = TwNewBar("Tweak Color");
+	TwAddButton(twBar, "Run", toggleLight1, NULL, "label='Color 1'"); 
+	TwAddButton(twBar, "Run1", toggleLight2, NULL, "label='Color 2'");
+	TwAddButton(twBar, "Run2", toggleLight3, NULL, "label='Color 3'");
+
+	TwAddVarRW(twBar, "Width", TW_TYPE_INT32, &_windowWidth, "label='wndWidth'");
+	TwAddVarRW(twBar, "Height", TW_TYPE_INT32, &_windowHeight, "label='wndheight'")
 	if(isOnline)
         net = new Network(ip);
-
 }
 
+void TW_CALL toggleLight1(void* clientData)
+{
+	if (glIsEnabled(GL_LIGHT1))
+	{
+		glDisable(GL_LIGHT1);
+	}
+	else
+	{
+		glEnable(GL_LIGHT1);
+	}
+}
+
+void TW_CALL toggleLight2(void* clientData)
+{
+	if (glIsEnabled(GL_LIGHT2))
+	{
+		glDisable(GL_LIGHT2);
+	}
+	else
+	{
+		glEnable(GL_LIGHT2);
+	}
+}
+
+void TW_CALL toggleLight3(void* clientData)
+{
+	if (glIsEnabled(GL_LIGHT3))
+	{
+		glDisable(GL_LIGHT3);
+	}
+	else
+	{
+		glEnable(GL_LIGHT3);
+	}
+}
 void MainGame::run()
 {
 	initSystems();
@@ -194,7 +255,7 @@ void MainGame::run()
 	//end
 	physicsEngine.AddObject(PhysicsObject(new BoundingSphere(Vector3f(95, 1, 95),1),Vector3f(0,0,0)));
    
-	objAI.PathFinding((int)9, (int)9);
+	objAI.PathFinding(9, 9);
 	gameLoop();
 }
 
@@ -283,93 +344,101 @@ void MainGame::gameLoop()
 void MainGame::processInput()
 {
 	SDL_Event evnt;
+    int handled;
 
 	//Will keep looping until there are no more events to process
 	while (SDL_PollEvent(&evnt))
 	{
-		switch (evnt.type)
-		{
-		case SDL_WINDOWEVENT:
-			switch (evnt.window.event)
-			{
-			case SDL_WINDOWEVENT_RESIZED:
-				//any flickering
-				SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+        //send event to ant tweak bar
+		handled = TwEventSDL(&evnt, SDL_MAJOR_VERSION, SDL_MINOR_VERSION);
 
-				//Set the background color to blue
-				glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        //if event is not handled by AntTweakBar
+        if (!handled)
+        {
+            switch (evnt.type)
+            {
+            case SDL_WINDOWEVENT:
+                switch (evnt.window.event)
+                {
+                case SDL_WINDOWEVENT_RESIZED:
+                    //any flickering
+                    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
-				//Set the base depth to 1.0
-				glClearDepth(1.0);
-				//Clear the color and depth buffer
-				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-				break;
-			}
-			break;
+                    //Set the background color to blue
+                    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
-		case SDL_QUIT:
-			_gameState = EXIT;
-			break;
-		case SDL_MOUSEMOTION:
-			//	std::cout << evnt.motion.x << " " << evnt.motion.y << std::endl;
-			break;
+                    //Set the base depth to 1.0
+                    glClearDepth(1.0);
+                    //Clear the color and depth buffer
+                    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+                    break;
+                }
+                break;
 
-		case SDL_MOUSEBUTTONDOWN:
-			mouseIn = true;
-			SDL_ShowCursor(SDL_DISABLE);
-			break;
+            case SDL_QUIT:
+                _gameState = EXIT;
+                break;
+            case SDL_MOUSEMOTION:
+                //	std::cout << evnt.motion.x << " " << evnt.motion.y << std::endl;
+                break;
 
-		case SDL_KEYDOWN:
-			switch (evnt.key.keysym.sym)
-			{
-				//Press F1 to go full screen
-			case SDLK_F1:
-				SDL_SetWindowFullscreen(ptr_window, SDL_WINDOW_FULLSCREEN);
-				break;
-				//Press F2 to come back from fullscreen
-				//Use function SDL_SetWindowSize() for custom size window
-			case SDLK_F2:
-				SDL_SetWindowFullscreen(ptr_window, 0);
-				break;
-			case SDLK_ESCAPE:
-				_gameState = EXIT;
-				break;
-			case SDLK_w:
-				if (mainCam.camPitch != 90 && mainCam.camPitch != -90)
-				{
-					mainCam.moveCamera(_moveVel, 0.0f);
-				}
-				mainCam.moveCameraUp(_moveVel, 0.0f);
-				break;
+            case SDL_MOUSEBUTTONDOWN:
+                mouseIn = true;
+                SDL_ShowCursor(SDL_DISABLE);
+                break;
 
-			case SDLK_s:
-				if (mainCam.camPitch != 90 && mainCam.camPitch != -90)
-				{
-					mainCam.moveCamera(_moveVel, 180.0f);
-				}
-				mainCam.moveCameraUp(_moveVel, 180.0f);
-				break;
-			case SDLK_p:
-				mouseIn = false;
-				SDL_ShowCursor(SDL_ENABLE);
-				break;
-			case SDLK_a:
-				mainCam.moveCamera(_moveVel, 90.0f);
-				break;
+            case SDL_KEYDOWN:
+                switch (evnt.key.keysym.sym)
+                {
+                    //Press F1 to go full screen
+                case SDLK_F1:
+                    SDL_SetWindowFullscreen(ptr_window, SDL_WINDOW_FULLSCREEN);
+                    break;
+                    //Press F2 to come back from fullscreen
+                    //Use function SDL_SetWindowSize() for custom size window
+                case SDLK_F2:
+                    SDL_SetWindowFullscreen(ptr_window, 0);
+                    break;
+                case SDLK_ESCAPE:
+                    _gameState = EXIT;
+                    break;
+                case SDLK_w:
+                    if (mainCam.camPitch != 90 && mainCam.camPitch != -90)
+                    {
+                        mainCam.moveCamera(_moveVel, 0.0f);
+                    }
+                    mainCam.moveCameraUp(_moveVel, 0.0f);
+                    break;
 
-			case SDLK_d:
-				mainCam.moveCamera(_moveVel, 270);
-				break;
-				
-			//Press q to play a sound
-			case SDLK_q:
-				ALfloat position[3] = { 500000, 500000, 500000 };
-				ALfloat velocity[3] = { 0, 0, 0 };
-				ALfloat orientation[6] = { 1, 0, 0, 0, 1, 0 };
-				audioManager->Play("thud.wav", position, velocity, orientation);
-				break;
+                case SDLK_s:
+                    if (mainCam.camPitch != 90 && mainCam.camPitch != -90)
+                    {
+                        mainCam.moveCamera(_moveVel, 180.0f);
+                    }
+                    mainCam.moveCameraUp(_moveVel, 180.0f);
+                    break;
+                case SDLK_p:
+                    mouseIn = false;
+                    SDL_ShowCursor(SDL_ENABLE);
+                    break;
+                case SDLK_a:
+                    mainCam.moveCamera(_moveVel, 90.0f);
+                    break;
 
-			}
+                case SDLK_d:
+                    mainCam.moveCamera(_moveVel, 270);
+                    break;
+                    
+                //Press q to play a sound
+                case SDLK_q:
+                    ALfloat position[3] = { 500000, 500000, 500000 };
+                    ALfloat velocity[3] = { 0, 0, 0 };
+                    ALfloat orientation[6] = { 1, 0, 0, 0, 1, 0 };
+                    audioManager->Play("thud.wav", position, velocity, orientation);
+                    break;
+
+                }
+            }
 		}
 	}
 }
@@ -458,6 +527,7 @@ void MainGame::draw()
 	glTranslatef(5, 5, 0);
 	obj3.Draw();
 	glPopMatrix();*/
+    TwDraw();
 
 	SDL_GL_SwapWindow(ptr_window);
 

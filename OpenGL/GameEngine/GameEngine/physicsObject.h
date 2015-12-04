@@ -37,9 +37,9 @@ public:
 	void Integrate(float delta);
 
 	/** Basic getter */
-	inline  Vector3f& GetPosition()  { return m_position; }
+	inline Vector3f& GetPosition()  { return m_position; }
 	/** Basic getter */
-	inline  Vector3f& GetVelocity()  { return m_velocity; }
+	inline Vector3f& GetVelocity()  { return m_velocity; }
 
 	/**
 	 * Returns a collider in the position of this object, updating the
