@@ -28,7 +28,7 @@ MainGame::MainGame()
 	_eyeX = 0;
 	_maxFPS = 60;
 	_mouseVel = 0.5f;
-	_moveVel = 0.2f;
+	_moveVel = 0.5f;
 	isOnline = true;
 
 	if(isOnline)
@@ -139,6 +139,7 @@ void MainGame::run()
 	initSystems();
 	obj.load("Models/Docahedron.obj");
 	obj2.load("Models/Docahedron.obj");
+	objTerrain.load("Models/Terrain.obj");
 
 //	BoundingSphere sphere1(Vector3f(10.0f,0.0f,0.0f),1.0f);
  //   BoundingSphere sphere2(Vector3f(0.0f,3.0f,0.0f),1.0f);
@@ -186,10 +187,14 @@ void MainGame::run()
     cout<<"Plane1 intersect Sphere4:" <<plane1IntersectSphere4.GetDoesIntersect()<<"Distance"<<plane1IntersectSphere4.GetDistance()<<endl;
 
 */
-
-   physicsEngine.AddObject(PhysicsObject(new BoundingSphere(Vector3f(10,1.5,0),1),Vector3f(-2,0,0)));
-   physicsEngine.AddObject(PhysicsObject(new BoundingSphere(Vector3f(-10,0,0),1),Vector3f(1,0,0)));
-
+	//Terrain
+	//physicsEngine.AddObject(PhysicsObject(new BoundingSphere(Vector3f(0, 0, 0), 0), Vector3f(0, 0, 0)));
+	//start
+	physicsEngine.AddObject(PhysicsObject(new BoundingSphere(Vector3f(5, 1, 5),1),Vector3f(0,0,0)));
+	//end
+	physicsEngine.AddObject(PhysicsObject(new BoundingSphere(Vector3f(95, 1, 95),1),Vector3f(0,0,0)));
+   
+	objAI.PathFinding((int)9, (int)9);
 	gameLoop();
 }
 
@@ -200,6 +205,32 @@ void MainGame::gameLoop()
 	{
 		float _startTicks = SDL_GetTicks();
 		processInput();
+		//AI change speed
+		if (objAI.m_nStep <= objAI.m_nPointer)
+		{
+			int delx = objAI.m_delta[objAI.m_Path[objAI.m_nStep]][0];
+			int delz = objAI.m_delta[objAI.m_Path[objAI.m_nStep]][1];
+			physicsEngine.GetObject(0).GetVelocity().SetX(delx*10);
+			physicsEngine.GetObject(0).GetVelocity().SetZ(delz*10);
+
+			int x = physicsEngine.GetObject(0).GetPosition().GetX();
+			int y = physicsEngine.GetObject(0).GetPosition().GetY();
+			int z = physicsEngine.GetObject(0).GetPosition().GetZ();
+
+			if(x>(objAI.m_nCurrentPosX+delx)*UNIT_LENGTH && x<(objAI.m_nCurrentPosX + delx+1)*UNIT_LENGTH)
+				if (z>(objAI.m_nCurrentPosZ + delz)*UNIT_LENGTH && z < (objAI.m_nCurrentPosZ + delz + 1)*UNIT_LENGTH)
+				{
+					objAI.m_nCurrentPosX += delx;
+					objAI.m_nCurrentPosZ += delz;
+					objAI.m_nStep++;
+				}
+		}
+		else
+		{
+			physicsEngine.GetObject(0).GetVelocity().SetX(0);
+			physicsEngine.GetObject(0).GetVelocity().SetZ(0);
+		}
+
 		draw();
 
 		if(isOnline)
@@ -354,7 +385,65 @@ void MainGame::draw()
 	gluLookAt(0, 1, 25, 0, 0, 0, 0, 1, 0);
 	glTranslatef(mainCam.camX*-1, mainCam.camY*-1, mainCam.camZ*-1);
 
+	//Draw a grid
+	glLineWidth(2.5);
+	glColor3f(1.0, 0.0, 0.0);
+	for (int i = 0; i < 11; i++)
+	{
+		glBegin(GL_LINES);
+		glVertex3f(i*UNIT_LENGTH, 1.0, 0.0);
+		glVertex3f(i*UNIT_LENGTH, 1.0, 100);
+		glEnd();
+		glBegin(GL_LINES);
+		glVertex3f(0, 1.0, i*UNIT_LENGTH);
+		glVertex3f(100, 1.0, i*UNIT_LENGTH);
+		glEnd();
 
+	}
+	//Start point
+	glColor3f(1.0, 1.0, 0.0);
+	glBegin(GL_QUADS);
+	glVertex3f(0, 1, 0);
+	glVertex3f(0, 1, UNIT_LENGTH);
+	glVertex3f(UNIT_LENGTH, 1 , UNIT_LENGTH);
+	glVertex3f(UNIT_LENGTH, 1, 0);
+	glEnd();
+
+	//Draw the map
+	glColor3f(1.0, 0.0, 0.0);
+	for (int i = 0; i < 10; i++)
+	{
+		for (int j = 0; j < 10; j++)
+			if (objAI.m_map[i][j])
+			{
+				glBegin(GL_QUADS);
+				glVertex3f(i*UNIT_LENGTH, 1, j*UNIT_LENGTH);
+				glVertex3f(i*UNIT_LENGTH, 1, (j+1)*UNIT_LENGTH);
+				glVertex3f((i+1)*UNIT_LENGTH, 1, (j + 1)*UNIT_LENGTH);
+				glVertex3f((i+1)*UNIT_LENGTH, 1, j*UNIT_LENGTH);
+				glEnd();
+			}
+	}
+	
+	//end point
+	glColor3f(0, 0, 1);
+	glBegin(GL_QUADS);
+	glVertex3f(100, 1, 100);
+	glVertex3f(90, 1, 100);
+	glVertex3f(90, 1, 90);
+	glVertex3f(100, 1, 90);
+	glEnd();
+
+
+	
+	//Set color back
+	glColor3f(1, 1, 1);
+
+	glPushMatrix();
+	glTranslatef(0, 0, 0);
+	objTerrain.Draw();
+	glPopMatrix();
+	
 	glPushMatrix();
 	glTranslatef(physicsEngine.GetObject(0).GetPosition().GetX(), physicsEngine.GetObject(0).GetPosition().GetY(), physicsEngine.GetObject(0).GetPosition().GetZ());
 	obj.Draw();

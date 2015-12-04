@@ -7,6 +7,9 @@
 #include "Network.h"
 #include "ALFramework.h"
 #include "AudioManager.h"
+#include "ObjAI.h"
+
+#define UNIT_LENGTH 10
 class MainGame
 {
 public:
@@ -21,7 +24,9 @@ public:
 	void processInput();
 	void mouseLook(int, int);
 	ObjLoader obj;
+	ObjectAI objAI;
 	ObjLoader obj2;
+	ObjLoader objTerrain;
 	Camera mainCam;
 	ObjLoader cam;
 	float _xDist;
