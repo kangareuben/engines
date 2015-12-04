@@ -1,15 +1,30 @@
 #include "Camera.h"
-#include <SDL/SDL.h>
-#include <GL/glew.h>
 #ifndef M_PI
 #define M_PI  3.14159
 #endif
 Camera::Camera()
 {
+    id=-1;
 	camX = 0.0f;
 	camY = 0.0f;
 	camZ = 0.0f;
 	bool mouseIn = true;
+}
+
+void Camera :: setId(int i)
+{
+        isready = true;
+        id=i;
+}
+
+bool Camera:: isReady()
+{
+   return isready;
+}
+
+int Camera :: getId()
+{
+    return id;
 }
 
 void Camera::lockCamera()
@@ -42,7 +57,7 @@ void Camera::moveCameraUp(float dist, float dir)
 {
 	float rad = (camPitch + dir) *M_PI / 180.0f;
 	camY += sin(rad)*dist;
-	
+
 }
 
 void Camera::control(float moveVel, float mouseVel, bool mi, SDL_Window *ptr_window)
@@ -67,5 +82,4 @@ void Camera::control(float moveVel, float mouseVel, bool mi, SDL_Window *ptr_win
 void Camera:: updateCamera()
 {
 	glTranslatef(-camX, -camY, -camZ);        //move the camera
-	
 }

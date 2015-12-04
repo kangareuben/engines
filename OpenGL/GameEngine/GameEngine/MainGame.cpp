@@ -1,22 +1,22 @@
 #include "MainGame.h"
 #include "Errors.h"
 #include "iostream"
-#include <boost/thread/thread.hpp>
-#include <random>
-
-float t = 0.0f;
+#include "ObjLoader.h"
+#include "boundingSphere.h"
+#include "aabb.h"
+#include "plane.h"
+#include "physicsObject.h"
+#include "physicsEngine.h"
 using namespace std;
-double accumulator = 0.0;
-float dt =0.0f;
-float ti;
-// 0 - ground
-// 1 - box 
-// 2 - sphere
+
+enum GameState { PLAY, EXIT };
+PhysicsEngine physicsEngine;
+GameState _gameState;
+char ip[20];
 
 MainGame::MainGame()
 {
-	currentTime = 0;
-	ptr_window = nullptr;
+	ptr_window = NULL;
 	_windowWidth = 640;
 	_windowHeight = 480;
 	_xDist = 0;
@@ -27,14 +27,20 @@ MainGame::MainGame()
 	_xRot = 0;
 	_eyeX = 0;
 	_maxFPS = 60;
-	_mouseVel = 0.2f;
-	_moveVel = 0.2f;
-	mapIndex = 0;
+	_mouseVel = 0.5f;
+	_moveVel = 0.5f;
+	isOnline = true;
+
+	if(isOnline)
+	{
+        std::cin.getline(ip,20);
+	}
 }
 
 
 MainGame::~MainGame()
 {
+
 }
 
 void MainGame::initSystems()
@@ -44,19 +50,19 @@ void MainGame::initSystems()
 
 	//Open an SDL window
 	ptr_window = SDL_CreateWindow("Game Engine", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, _windowWidth, _windowHeight, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
-	if (ptr_window == nullptr)
+	if (ptr_window == NULL)
 	{
 		fatalError("SDL Window could not be created!");
 	}
 
 	//Set up our OpenGL context
 	SDL_GLContext glContext = SDL_GL_CreateContext(ptr_window);
-	if (glContext == nullptr)
+	if (glContext == NULL)
 	{
 		fatalError("SDL_GL context could not be created!");
 	}
 
-	//Set up glew 
+	//Set up glew
 	GLenum error = glewInit();
 	if (error != GLEW_OK)
 	{
@@ -82,121 +88,194 @@ void MainGame::initSystems()
 
 	GLfloat amb_light[] = { 0.1, 0.1, 0.1, 1.0 };
 	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, amb_light);
-	glEnable(GL_LIGHT0);
+	//glEnable(GL_LIGHT0);
 	glEnable(GL_COLOR_MATERIAL);
 	glShadeModel(GL_SMOOTH);
 	glDepthFunc(GL_LEQUAL);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_LIGHTING);
 	glEnable(GL_LIGHT0);
+
+	//Lighting test
+	ambient1 = new GLfloat[4];
+	ambient1[0] = 0.2;
+	ambient1[1] = 0.5;
+	ambient1[2] = 0.3;
+	ambient1[3] = 1.0;
+	glLightfv(GL_LIGHT1, GL_AMBIENT, ambient1);
+	GLfloat diffuse1[] = { 0.1, 0.1, 0.1, 1.0 };
+	glLightfv(GL_LIGHT1, GL_DIFFUSE, diffuse1);
+	GLfloat specular1[] = { 0.1, 0.1, 0.1, 1.0 };
+	glLightfv(GL_LIGHT1, GL_SPECULAR, specular1);
+	/*GLfloat position1[] = { 0, 50, 0, 1.0 };
+	glLightfv(GL_LIGHT1, GL_POSITION, position1);
+	GLfloat direction1[] = { 0, -1, 0 };
+	glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, direction1);
+	GLfloat cutoff1 = 10;
+	glLightfv(GL_LIGHT1, GL_SPOT_CUTOFF, &cutoff1);*/
+	glEnable(GL_LIGHT1);
+
+	/*GLfloat ambient2[] = { 0.5, 0.3, 0.2, 1.0 };
+	glLightfv(GL_LIGHT2, GL_AMBIENT, ambient2);
+	glEnable(GL_LIGHT2);*/
+
+	//Set up OpenAL
+	ALFWInit();
+	if (!ALFWInitOpenAL())
+	{
+		ALFWprintf("Failed to initialize OpenAL\n");
+		ALFWShutdown();
+	}
+
+	audioManager = new AudioManager();
+
+	if(isOnline)
+        net = new Network(ip);
+
 }
 
 void MainGame::run()
 {
-	
 	initSystems();
-	//file path,initial x, initial y, initial z, gravity true or false, colliderType, width,height,depth,mass
-	createObject("Models/box.obj", 2, 20, 20, 1, 1, 1, 1, true, 1);
-	createObject("Models/sphere.obj", -2, 20, 20, 1, 1, 1, 2, true, 2);
-	createObject("Models/Terrain.obj", 0, 0, 0, 200, 0.001f, 200, 1000, false, 0);
-	createObject("Models/box.obj", 2, 10, 20, 1, 1, 1, 2, false, 1);
-	createObject("Models/box.obj", 10, 0, 20, 1, 1, 1, 3, true, 1);
-	objMap.at(mapIndex - 1)->physics->setVelocity(-0.1f, 0, 0);
-	createObject("Models/box.obj", -10, 0, 20, 1, 1, 1, 4, true, 1);
-	objMap.at(mapIndex - 1)->physics->setVelocity(0.1f, 0, 0);
+	obj.load("Models/Docahedron.obj");
+	obj2.load("Models/Docahedron.obj");
+	objTerrain.load("Models/Terrain.obj");
 
-	
-	std::random_device rd;
-	std::mt19937 mt(rd());
-	std::uniform_real_distribution<double> dist(-0.1f, 0.1f);
-	std::uniform_real_distribution<double> dist2(0.001f, 0.005f);
+//	BoundingSphere sphere1(Vector3f(10.0f,0.0f,0.0f),1.0f);
+ //   BoundingSphere sphere2(Vector3f(0.0f,3.0f,0.0f),1.0f);
+//	BoundingSphere sphere3(Vector3f(0.0f,0.0f,2.0f),1.0f);
+//	BoundingSphere sphere4(Vector3f(1.0f,0.0f,0.0f),1.0f);
+/*
+	IntersectData sphereIntersectSphere2 = sphere1.IntersectBoundingSphere(sphere2);
+    IntersectData sphereIntersectSphere3 = sphere1.IntersectBoundingSphere(sphere3);
+	IntersectData sphereIntersectSphere4 = sphere1.IntersectBoundingSphere(sphere4);
 
-	
+	cout<<"Sphere 1 intersects sphere2: "<< sphereIntersectSphere2.GetDoesIntersect()<<sphereIntersectSphere2.GetDistance()<<endl;
+    cout<<"Sphere 1 intersects sphere3: "<< sphereIntersectSphere3.GetDoesIntersect()<<sphereIntersectSphere3.GetDistance()<<endl;
+	cout<<"Sphere 1 intersects sphere4: "<< sphereIntersectSphere4.GetDoesIntersect()<<sphereIntersectSphere4.GetDistance()<<endl;
 
-	for (int i = 0; i < 50; i++)
-	{
-		createObject("Models/Particle.obj", 0, 0, 0, 0.001f, 0.001f, 0.001f, 0.1f, false, 5);
-		float x, y, z;
-		x = dist(mt);
-		y = dist2(mt);
-		z = dist(mt);
 
-		objMap.at(mapIndex - 1)->physics->setVelocity(x, y, z);
-	}
+/*
+    AABB aabb1(Vector3d(0.0,0.0,0.0),Vector3d(1.0,1.0,1.0));
+    AABB aabb2(Vector3d(1.0,1.0,1.0),Vector3d(2.0,2.0,2.0));
+    AABB aabb3(Vector3d(1.0,0.0,0.0),Vector3d(2.0,1.0,1.0));
+    AABB aabb4(Vector3d(0.0,0.0,-2.0),Vector3d(1.0,1.0,-1.0));
+    AABB aabb5(Vector3d(0.0,0.5,0.0),Vector3d(1.0,1.5,1.0));
 
+    IntersectData aabb1Intersectaabb2 = aabb1.IntersectAABB(aabb2);
+    IntersectData aabb1Intersectaabb3 = aabb1.IntersectAABB(aabb3);
+    IntersectData aabb1Intersectaabb4 = aabb1.IntersectAABB(aabb4);
+    IntersectData aabb1Intersectaabb5 = aabb1.IntersectAABB(aabb5);
+
+
+    cout<<"AABB1 intersect AABB2 : "<<aabb1Intersectaabb2.GetDoesIntersect()<<"Distance:"<<aabb1Intersectaabb2.GetDistance()<<endl;
+    cout<<"AABB1 intersect AABB3 : "<<aabb1Intersectaabb3.GetDoesIntersect()<<"Distance:"<<aabb1Intersectaabb3.GetDistance()<<endl;
+    cout<<"AABB1 intersect AABB4 : "<<aabb1Intersectaabb4.GetDoesIntersect()<<"Distance:"<<aabb1Intersectaabb4.GetDistance()<<endl;
+    cout<<"AABB1 intersect AABB5 : "<<aabb1Intersectaabb5.GetDoesIntersect()<<"Distance:"<<aabb1Intersectaabb5.GetDistance()<<endl;
+
+*/
+  /*  Plane plane1(Vector3d(0.0,1.0,0.0),0.0);
+
+    IntersectData plane1IntersectSphere1 = plane1.IntersectSphere(sphere1);
+    IntersectData plane1IntersectSphere2 = plane1.IntersectSphere(sphere2);
+    IntersectData plane1IntersectSphere3 = plane1.IntersectSphere(sphere3);
+    IntersectData plane1IntersectSphere4 = plane1.IntersectSphere(sphere4);
+
+    cout<<"Plane1 intersect Sphere1:" <<plane1IntersectSphere1.GetDoesIntersect()<<"Distance"<<plane1IntersectSphere1.GetDistance()<<endl;
+    cout<<"Plane1 intersect Sphere2:" <<plane1IntersectSphere2.GetDoesIntersect()<<"Distance"<<plane1IntersectSphere2.GetDistance()<<endl;
+    cout<<"Plane1 intersect Sphere3:" <<plane1IntersectSphere3.GetDoesIntersect()<<"Distance"<<plane1IntersectSphere3.GetDistance()<<endl;
+    cout<<"Plane1 intersect Sphere4:" <<plane1IntersectSphere4.GetDoesIntersect()<<"Distance"<<plane1IntersectSphere4.GetDistance()<<endl;
+
+*/
+	//Terrain
+	//physicsEngine.AddObject(PhysicsObject(new BoundingSphere(Vector3f(0, 0, 0), 0), Vector3f(0, 0, 0)));
+	//start
+	physicsEngine.AddObject(PhysicsObject(new BoundingSphere(Vector3f(5, 1, 5),1),Vector3f(0,0,0)));
+	//end
+	physicsEngine.AddObject(PhysicsObject(new BoundingSphere(Vector3f(95, 1, 95),1),Vector3f(0,0,0)));
+   
+	objAI.PathFinding((int)9, (int)9);
 	gameLoop();
 }
 
 void MainGame::gameLoop()
 {
 	//Will loop until we set _gameState to EXIT
-	while (_gameState != GameState::EXIT)
+	while (_gameState != EXIT)
 	{
-		const float DESIRED_FPS = 60.0f;
-		const float MS_PER_SECOND = 1000.0f;
-		const float DESIRED_FRAMETIME = MS_PER_SECOND / DESIRED_FPS;
-		const int MAX_PHYSICS_STEPS = 6;
-		const float MAX_DELTA_TIME = 1.0f;
-		float previousTicks = SDL_GetTicks();
-
+		float _startTicks = SDL_GetTicks();
 		processInput();
+		//AI change speed
+		if (objAI.m_nStep <= objAI.m_nPointer)
+		{
+			int delx = objAI.m_delta[objAI.m_Path[objAI.m_nStep]][0];
+			int delz = objAI.m_delta[objAI.m_Path[objAI.m_nStep]][1];
+			physicsEngine.GetObject(0).GetVelocity().SetX(delx*10);
+			physicsEngine.GetObject(0).GetVelocity().SetZ(delz*10);
+
+			int x = physicsEngine.GetObject(0).GetPosition().GetX();
+			int y = physicsEngine.GetObject(0).GetPosition().GetY();
+			int z = physicsEngine.GetObject(0).GetPosition().GetZ();
+
+			if(x>(objAI.m_nCurrentPosX+delx)*UNIT_LENGTH && x<(objAI.m_nCurrentPosX + delx+1)*UNIT_LENGTH)
+				if (z>(objAI.m_nCurrentPosZ + delz)*UNIT_LENGTH && z < (objAI.m_nCurrentPosZ + delz + 1)*UNIT_LENGTH)
+				{
+					objAI.m_nCurrentPosX += delx;
+					objAI.m_nCurrentPosZ += delz;
+					objAI.m_nStep++;
+				}
+		}
+		else
+		{
+			physicsEngine.GetObject(0).GetVelocity().SetX(0);
+			physicsEngine.GetObject(0).GetVelocity().SetZ(0);
+		}
+
 		draw();
 
-
-		float newTicks = SDL_GetTicks();
-		float frameTime = newTicks - previousTicks;
-		previousTicks = newTicks;
-		dt = frameTime / DESIRED_FRAMETIME;
-	
-		int i = 0;
-
-		while (dt>0.0f && i <MAX_PHYSICS_STEPS )
+		if(isOnline)
 		{
-			float deltaTime;
-
-
-			if (dt < MAX_DELTA_TIME)
-				deltaTime = dt;
-			else
-				deltaTime = MAX_DELTA_TIME;
-
-			for (int j = 0; j < mapIndex; j++)
-			{
-				if (objMap.at(j)->physics->colliderType != 5)
-				{
-					for (int k = j + 1; k < mapIndex; k++)
-					{
-						if (objMap.at(k)->physics->colliderType != 5)
-						{
-							checkCollision(objMap.at(j)->physics, objMap.at(k)->physics);
-						}
-					}
-				}
-			}
-
-			for (int j = 0; j < mapIndex; j++)
-			{
-				objMap.at(j)->physics->update(deltaTime);
-			}
-			/*checkCollision(&obj.physics, &obj3.physics);
-			checkCollision(&obj2.physics, &obj3.physics);
-			checkCollision(&obj.physics, &box1.physics);
-			checkCollision(&box1.physics, &obj3.physics);
-			checkCollision(&box2.physics, &box3.physics);
-			obj.physics.update(deltaTime);
-			obj2.physics.update(deltaTime);
-			box1.physics.update(deltaTime);
-			box2.physics.update(deltaTime);
-			box3.physics.update(deltaTime);
-			for (int i = 0; i < 500; i++)
-			{
-				particles[i].physics.update(deltaTime);
-			}*/
-			i++;
-			dt -= deltaTime;
+            net->Send(&mainCam);
+        }
+		calculateFPS();
+		//print only once every 10 frames
+		static int _frameCounter = 0;
+		_frameCounter++;
+		if (_frameCounter == 10)
+		{
+			//	cout << _fps << endl;
+			_frameCounter = 0;
 		}
-		
+
+		float _frameTicks = SDL_GetTicks() - _startTicks;
+
+		//limit FPS to max FPS
+		if (1000.0f / _maxFPS > _frameTicks)
+		{
+			SDL_Delay(1000.0f / _maxFPS - _frameTicks);
+		}
+
+		for (int i = 0; i < 3; i++)
+		{
+			//ambient1[i] += (((float)rand()) / RAND_MAX * 2 - 1) / 5;
+			ambient1[i] += ((float)rand()) / RAND_MAX * .02;
+			if (ambient1[i] >= 1.0)
+			{
+				ambient1[i] = 0.0;
+			}
+		}
+		glLightfv(GL_LIGHT1, GL_AMBIENT, ambient1);
 	}
+
+	//Clean up OpenAL
+	audioManager->Cleanup();
+
+	ALFWShutdownOpenAL();
+	ALFWShutdown();
+	delete audioManager;
+
+	//Clean up lighting
+	delete[] ambient1;
 }
 
 
@@ -229,7 +308,7 @@ void MainGame::processInput()
 			break;
 
 		case SDL_QUIT:
-			_gameState = GameState::EXIT;
+			_gameState = EXIT;
 			break;
 		case SDL_MOUSEMOTION:
 			//	std::cout << evnt.motion.x << " " << evnt.motion.y << std::endl;
@@ -239,8 +318,6 @@ void MainGame::processInput()
 			mouseIn = true;
 			SDL_ShowCursor(SDL_DISABLE);
 			break;
-
-
 
 		case SDL_KEYDOWN:
 			switch (evnt.key.keysym.sym)
@@ -255,7 +332,7 @@ void MainGame::processInput()
 				SDL_SetWindowFullscreen(ptr_window, 0);
 				break;
 			case SDLK_ESCAPE:
-				_gameState = GameState::EXIT;
+				_gameState = EXIT;
 				break;
 			case SDLK_w:
 				if (mainCam.camPitch != 90 && mainCam.camPitch != -90)
@@ -283,12 +360,16 @@ void MainGame::processInput()
 			case SDLK_d:
 				mainCam.moveCamera(_moveVel, 270);
 				break;
-
+				
+			//Press q to play a sound
+			case SDLK_q:
+				ALfloat position[3] = { 500000, 500000, 500000 };
+				ALfloat velocity[3] = { 0, 0, 0 };
+				ALfloat orientation[6] = { 1, 0, 0, 0, 1, 0 };
+				audioManager->Play("thud.wav", position, velocity, orientation);
+				break;
 
 			}
-
-
-
 		}
 	}
 }
@@ -304,44 +385,80 @@ void MainGame::draw()
 	gluLookAt(0, 1, 25, 0, 0, 0, 0, 1, 0);
 	glTranslatef(mainCam.camX*-1, mainCam.camY*-1, mainCam.camZ*-1);
 
-	for (int i = 0; i < mapIndex; i++)
+	//Draw a grid
+	glLineWidth(2.5);
+	glColor3f(1.0, 0.0, 0.0);
+	for (int i = 0; i < 11; i++)
 	{
-		glPushMatrix();
-		objMap.at(i)->Draw(objMap.at(i)->physics);
-		glPopMatrix();
-	}
+		glBegin(GL_LINES);
+		glVertex3f(i*UNIT_LENGTH, 1.0, 0.0);
+		glVertex3f(i*UNIT_LENGTH, 1.0, 100);
+		glEnd();
+		glBegin(GL_LINES);
+		glVertex3f(0, 1.0, i*UNIT_LENGTH);
+		glVertex3f(100, 1.0, i*UNIT_LENGTH);
+		glEnd();
 
-	/*glPushMatrix();
-	obj.model.Draw();
-	glPopMatrix();
+	}
+	//Start point
+	glColor3f(1.0, 1.0, 0.0);
+	glBegin(GL_QUADS);
+	glVertex3f(0, 1, 0);
+	glVertex3f(0, 1, UNIT_LENGTH);
+	glVertex3f(UNIT_LENGTH, 1 , UNIT_LENGTH);
+	glVertex3f(UNIT_LENGTH, 1, 0);
+	glEnd();
+
+	//Draw the map
+	glColor3f(1.0, 0.0, 0.0);
+	for (int i = 0; i < 10; i++)
+	{
+		for (int j = 0; j < 10; j++)
+			if (objAI.m_map[i][j])
+			{
+				glBegin(GL_QUADS);
+				glVertex3f(i*UNIT_LENGTH, 1, j*UNIT_LENGTH);
+				glVertex3f(i*UNIT_LENGTH, 1, (j+1)*UNIT_LENGTH);
+				glVertex3f((i+1)*UNIT_LENGTH, 1, (j + 1)*UNIT_LENGTH);
+				glVertex3f((i+1)*UNIT_LENGTH, 1, j*UNIT_LENGTH);
+				glEnd();
+			}
+	}
+	
+	//end point
+	glColor3f(0, 0, 1);
+	glBegin(GL_QUADS);
+	glVertex3f(100, 1, 100);
+	glVertex3f(90, 1, 100);
+	glVertex3f(90, 1, 90);
+	glVertex3f(100, 1, 90);
+	glEnd();
+
+
+	
+	//Set color back
+	glColor3f(1, 1, 1);
 
 	glPushMatrix();
-	obj2.model.Draw();
+	glTranslatef(0, 0, 0);
+	objTerrain.Draw();
 	glPopMatrix();
 	
 	glPushMatrix();
-	obj3.model.Draw();
+	glTranslatef(physicsEngine.GetObject(0).GetPosition().GetX(), physicsEngine.GetObject(0).GetPosition().GetY(), physicsEngine.GetObject(0).GetPosition().GetZ());
+	obj.Draw();
 	glPopMatrix();
-
 	glPushMatrix();
-	box1.model.Draw();
+	glTranslatef(physicsEngine.GetObject(1).GetPosition().GetX(), physicsEngine.GetObject(1).GetPosition().GetY(), physicsEngine.GetObject(1).GetPosition().GetZ());
+	obj2.Draw();
 	glPopMatrix();
-
-	glPushMatrix();
-	box2.model.Draw();
-	glPopMatrix();
-
-	glPushMatrix();
-	box3.model.Draw();
-	glPopMatrix();
-
-
-	ti = SDL_GetTicks();
-	glPushMatrix();
-	if (ti/1000.0f<5)
-	for (int i = 0; i < 50; i++)
-		particles[i].model.Draw();
+    physicsEngine.Simulate(0.02);
+    physicsEngine.HandleCollisions();
+	/*glPushMatrix();
+	glTranslatef(5, 5, 0);
+	obj3.Draw();
 	glPopMatrix();*/
+
 	SDL_GL_SwapWindow(ptr_window);
 
 }
@@ -394,162 +511,4 @@ void MainGame::calculateFPS()
 	{
 		_fps = 60;
 	}
-}
-
-bool MainGame :: checkCollision(ObjPhysics *objA, ObjPhysics *objB)
-{
-	int flag = 0;
-
-	if (objA->colliderType == 1 && objB->colliderType == 0)
-	{
-		if (fabs(objA->position[0] - objB->position[0]) > (objA->width / 2 + objB->width / 2)) flag = 0;
-		else if (fabs(objA->position[1] - objB->position[1]) > (objA->height / 2 + objB->height / 2)) flag = 0;
-		else if (fabs(objA->position[2] - objB->position[2]) > (objA->depth / 2 + objB->depth / 2)) flag = 0;
-		else flag = 1;
-		if (flag == 1)
-		{
-			objA->velocity[0] *= -1; objA->velocity[1] *= -1; objA->velocity[2] *= -1;
-	
-			return true;
-		}
-
-		else
-			return false;
-	}
-
-	if (objA->colliderType == 1 && objB->colliderType == 1)
-	{
-		if (fabs(objA->position[0] - objB->position[0]) > (objA->width / 2 + objB->width / 2)) flag = 0;
-		else if (fabs(objA->position[1] - objB->position[1]) > (objA->height / 2 + objB->height / 2)) flag = 0;
-		else if (fabs(objA->position[2] - objB->position[2]) > (objA->depth / 2 + objB->depth / 2)) flag = 0;
-		else flag = 1;
-		if (flag == 1)
-		{
-		//	float m1 = objA->mass / (objA->mass + objB->mass);
-		//	float m1 = objA->mass / (objA->mass + objB->mass);
-
-			float temp0 = objA->velocity[0];
-			float temp1 = objA->velocity[1];
-			float temp2 = objA->velocity[2];
-			objA->velocity[0] = -1 * objB->velocity[0]; objA->velocity[1] = -1 * objB->velocity[1]; objA->velocity[2] = -1 * objB->velocity[2];
-			objB->velocity[0] = -1 * temp0; objB->velocity[1] = -1 * temp1; objB->velocity[2] = -1 * temp2;
-
-			return true;
-		}
-
-		else
-			return false;
-	}
-
-	else if (objA->colliderType == 2 && objB->colliderType == 0)
-	{
-		double squaredDistance;
-		auto check = [&](
-			const double pn,
-			const double bmin,
-			const double bmax) -> double
-		{
-			double out = 0;
-			double v = pn;
-
-			if (v < bmin)
-			{
-				double val = (bmin - v);
-				out += val * val;
-			}
-
-			if (v > bmax)
-			{
-				double val = (v - bmax);
-				out += val * val;
-			}
-
-			return out;
-		};
-
-		// Squared distance
-		double sq = 0.0;
-
-		sq += check(objA->position[0], objB->point1[0], objB->point8[0]);
-		sq += check(objA->position[1], objB->point1[1], objB->point8[1]);
-		sq += check(objA->position[2], objB->point1[2], objB->point8[2]);
-
-		squaredDistance = sq;
-		if (squaredDistance <= (objA->width * objA->width) == true)
-		{
-			//objA->reverseSpeed();
-			objA->velocity[0] *= -1; objA->velocity[1] *= -1; objA->velocity[2] *= -1;
-
-			objB->velocity[0] *= -1; objB->velocity[1] *= -1; objB->velocity[2] *= -1;
-
-		//	objB->reverseSpeed();
-			
-		}
-		cout << "squaredDistance = " << squaredDistance << "    width squared = " << objA->width * objA->width << endl;
-		return squaredDistance <= (objA->width * objA->width);
-	}
-
-	else if (objB->colliderType == 2 && objA->colliderType == 0)
-	{
-		double squaredDistance;
-		auto check = [&](
-			const double pn,
-			const double bmin,
-			const double bmax) -> double
-		{
-			double out = 0;
-			double v = pn;
-
-			if (v < bmin)
-			{
-				double val = (bmin - v);
-				out += val * val;
-			}
-
-			if (v > bmax)
-			{
-				double val = (v - bmax);
-				out += val * val;
-			}
-
-			return out;
-		};
-
-		// Squared distance
-		double sq = 0.0;
-
-		sq += check(objB->position[0], objA->point1[0], objA->point8[0]);
-		sq += check(objB->position[1], objA->point1[1], objA->point8[1]);
-		sq += check(objB->position[2], objA->point1[2], objA->point8[2]);
-
-		squaredDistance = sq;
-		if (squaredDistance <= (objB->width * objB->width) == true)
-		{ 
-		
-			objA->velocity[0] *= -1; objA->velocity[1] *= -1; objA->velocity[2] *= -1;
-
-			objB->velocity[0] *= -1; objB->velocity[1] *= -1; objB->velocity[2] *= -1;
-		}
-		return squaredDistance <= (objB->width * objB->width);
-	}
-
-	else
-		return false;
-}
-
-void MainGame::createObject(char* fileName, float x, float y, float z, float width, float height, float depth, float mass, bool hasGravity, int colliderType)
-{
-	Object* obj = new Object();
-	obj->setIndex(mapIndex);
-	ObjLoader* model = new ObjLoader();
-	model->load(fileName);
-
-	obj->setModel(model);
-
-	ObjPhysics* physics = new ObjPhysics(x, y, z, width, height, depth, mass, hasGravity, colliderType);
-
-	obj->setPhysics(physics);
-
-	objMap.insert(pair<int, Object*>(mapIndex, obj));
-	mapIndex++;
 }

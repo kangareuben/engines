@@ -1,44 +1,34 @@
 #pragma once
-#include <SDL/SDL.h>
+#include <SDL.h>
 #include <GL/glew.h>
+#include "ObjLoader.h"
 #include "Camera.h"
-#include "Object.h"
-#include <time.h>
-#include <ctime>
-#include <algorithm>
-#include <vector>
-#include <map>
-enum class GameState { PLAY, EXIT };
+//#include "MainGame.h"
+#include "Network.h"
+#include "ALFramework.h"
+#include "AudioManager.h"
+#include "ObjAI.h"
 
+#define UNIT_LENGTH 10
 class MainGame
 {
 public:
 	MainGame();
 	~MainGame();
+	Network *net;
+	bool isOnline;
 	void initSystems();
 	void gameLoop();
 	void draw();
 	void run();
 	void processInput();
 	void mouseLook(int, int);
-	GameState _gameState;
-	double currentTime;
-	bool checkCollision(ObjPhysics*,ObjPhysics*);
-
-	map<int, Object*> objMap;
-	int mapIndex;
-
-	//Object obj;
-	//Object obj2;
-	//Object obj3;
-	//Object box1;
-	//Object box2;
-	//Object box3;
-	//Object particles[500];
-
-	Object player;
+	ObjLoader obj;
+	ObjectAI objAI;
+	ObjLoader obj2;
+	ObjLoader objTerrain;
 	Camera mainCam;
-	Object cam;
+	ObjLoader cam;
 	float _xDist;
 	float _yDist;
 	float _zDist;
@@ -49,7 +39,7 @@ public:
 	int _windowHeight;
 	int _windowWidth;
 	void calculateFPS();
-	void createObject(char*, float, float, float, float, float, float, float, bool, int);
+	AudioManager* audioManager;
 
 private:
 	SDL_Window *ptr_window;
@@ -59,4 +49,5 @@ private:
 	float _maxFPS;
 	float _moveVel;
 	float _mouseVel;
+	GLfloat* ambient1;
 };
