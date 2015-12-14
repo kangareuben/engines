@@ -31,7 +31,7 @@ PhysicsObject::~PhysicsObject()
 }
 
 
-void PhysicsObject::Integrate(float delta)
+void PhysicsObject::Integrate(double delta)
 {
 	m_position += m_velocity * delta;
 	std::cout<<m_position.GetX()<<" "<<m_position.GetY()<<" "<<m_position.GetZ()<<std::endl;

@@ -34,7 +34,7 @@ public:
 	 *
 	 * @param delta How much time to simulate.
 	 */
-	void Integrate(float delta);
+	void Integrate(double delta);
 
 	/** Basic getter */
 	inline const Vector3f& GetPosition() const { return m_position; }

@@ -1,4 +1,4 @@
-#include "ObjLoader.h"
+/*#include "ObjLoader.h"
 #include <math.h>
 #include <vector>
 #include <string>
@@ -16,10 +16,10 @@ ObjLoader::ObjLoader()
 
 
 
-float *ObjLoader::calculateNormal(float *ptr_coord1, float *ptr_coord2, float *ptr_coord3)
+double *ObjLoader::calculateNormal(double *ptr_coord1, double *ptr_coord2, double *ptr_coord3)
 {
 	//Calculate Vector 1 & Vector 2
-	float va[3], vb[3], vr[3], val;
+	double va[3], vb[3], vr[3], val;
 	va[0] = ptr_coord1[0] - ptr_coord2[0];
 	va[1] = ptr_coord1[1] - ptr_coord2[1];
 	va[2] = ptr_coord1[2] - ptr_coord2[2];
@@ -38,7 +38,7 @@ float *ObjLoader::calculateNormal(float *ptr_coord1, float *ptr_coord2, float *p
 
 	val = sqrt(vr[0] * vr[0] + vr[1] * vr[1] + vr[2] * vr[2]);
 
-	float norm[3];
+	double norm[3];
 	norm[0] = vr[0] / val;
 	norm[1] = vr[1] / val;
 	norm[2] = vr[2] / val;
@@ -56,13 +56,13 @@ int ObjLoader::load(char *fileName)
 		objFile.seekg(0, ios::beg);
 
 		//Memory for verices
-		ptr_vertexBuffer = (float *)malloc(fileSize);
+		ptr_vertexBuffer = (double *)malloc(fileSize);
 
 		//Memory for triangles
-		ptr_facesTriangles = (float *)malloc(fileSize *sizeof(float));
+		ptr_facesTriangles = (double *)malloc(fileSize *sizeof(double));
 
 		//Memory for normals
-		ptr_normals = (float *)malloc(fileSize*sizeof(float));
+		ptr_normals = (double *)malloc(fileSize*sizeof(double));
 
 		int triangleIndex = 0;
 		int normalIndex = 0;
@@ -105,10 +105,10 @@ int ObjLoader::load(char *fileName)
 				}
 
 				//Calculate Normals used for lighting
-				float coord1[3] = { ptr_facesTriangles[triangleIndex], ptr_facesTriangles[triangleIndex + 1], ptr_facesTriangles[triangleIndex + 2] };
-				float coord2[3] = { ptr_facesTriangles[triangleIndex + 3], ptr_facesTriangles[triangleIndex + 4], ptr_facesTriangles[triangleIndex + 5] };
-				float coord3[3] = { ptr_facesTriangles[triangleIndex + 6], ptr_facesTriangles[triangleIndex + 7], ptr_facesTriangles[triangleIndex + 8] };
-				float *norm = this->calculateNormal(coord1, coord2, coord3);
+				double coord1[3] = { ptr_facesTriangles[triangleIndex], ptr_facesTriangles[triangleIndex + 1], ptr_facesTriangles[triangleIndex + 2] };
+				double coord2[3] = { ptr_facesTriangles[triangleIndex + 3], ptr_facesTriangles[triangleIndex + 4], ptr_facesTriangles[triangleIndex + 5] };
+				double coord3[3] = { ptr_facesTriangles[triangleIndex + 6], ptr_facesTriangles[triangleIndex + 7], ptr_facesTriangles[triangleIndex + 8] };
+				double *norm = this->calculateNormal(coord1, coord2, coord3);
 
 				tCounter = 0;
 				for (int i = 0; i < 3; i++)
@@ -147,10 +147,11 @@ void ObjLoader::Draw()
 {
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_NORMAL_ARRAY);
-	glVertexPointer(3, GL_FLOAT, 0, ptr_facesTriangles);
-	glNormalPointer(GL_FLOAT, 0, ptr_normals);
+	glVertexPointer(3, GL_double, 0, ptr_facesTriangles);
+	glNormalPointer(GL_double, 0, ptr_normals);
 	glDrawArrays(GL_TRIANGLES, 0, _totalConnectedTriangles);
 	glDisableClientState(GL_VERTEX_ARRAY);
 	glDisableClientState(GL_NORMAL_ARRAY);
 
 }
+*/

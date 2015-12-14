@@ -5,38 +5,64 @@
 #include "intersectData.h"
 #include "math3d.h"
 #include "referenceCounter.h"
-
-//Base class for colliders to be used in the Physics Engine
+//include "plane.h"
+/**
+ * The Collider class is the base class for colliders that can be used in the
+ * physics engine. More specific colliders should inherit from this class
+ */
 class Collider : public ReferenceCounter
 {
 public:
-	//Types of colliders
+	/**
+	 * This enumeration stores all the types of colliders that can be used.
+	 */
 	enum
 	{
 		TYPE_SPHERE,
 		TYPE_AABB,
-
+        TYPE_PLANE,
 		TYPE_SIZE
 	};
 
-	
+	/**
+	 * Creates a Collider in a usable state.
+	 *
+	 * @param type The type of collider this represents.
+	 */
 	Collider(int type) :
 		ReferenceCounter(),
 		m_type(type) {}
 
-	//Intersect data after collision
+	/**
+	 * Calculates information about if this collider is intersecting with
+	 * another collider.
+	 *
+	 * @param other The collider that is being checked for intersection.
+	 */
 	IntersectData Intersect(const Collider& other) const;
 
-	//Moving the collider (care should be taken to match with the object rendered from objloader)
+	/**
+	 * Moves the entire collider by translation distance. Should be overriden
+	 * by subclasses.
+	 *
+	 * @param translation Distance to move the collider
+	 */
 	virtual void Transform(const Vector3f& translation) {}
-	
-	//Center of collider
+	/**
+	 * Returns the center position of the collider. Should be overriden by
+	 * subclasses.
+	 */
 	virtual Vector3f GetCenter() const { return Vector3f(0,0,0); }
 
-	//getter
+	/** Basic getter */
 	inline int GetType() const { return m_type; }
 private:
-
+	/**
+	 * What type of collider this is. Should be set to some value from the
+	 * TYPE enum. This value determines what sort of intersect checks are used
+	 * and other details about the collider; should only be set by an appropriate
+	 * subclass or strange behaviour may result!
+	 */
 	int m_type;
 };
 

@@ -3,8 +3,8 @@
 
 #include <math.h>
 #define MATH_PI 3.1415926535897932384626433832795
-#define ToRadians(x) (float)(((x) * MATH_PI / 180.0f))
-#define ToDegrees(x) (float)(((x) * 180.0f / MATH_PI))
+#define ToRadians(x) (double)(((x) * MATH_PI / 180.0f))
+#define ToDegrees(x) (double)(((x) * 180.0f / MATH_PI))
 
 template<typename T>
 inline T Clamp(const T &a, const T &min, const T &max)
@@ -640,51 +640,51 @@ public:
 
 class Quaternion;
 
-class Vector3f : public Vector3<float>
+class Vector3f : public Vector3<double>
 {
 public:
-	Vector3f(float x = 0.0f, float y = 0.0f, float z = 0.0f)
+	Vector3f(double x = 0.0f, double y = 0.0f, double z = 0.0f)
 	{
 		(*this)[0] = x;
 		(*this)[1] = y;
 		(*this)[2] = z;
 	}
 
-	Vector3f(const Vector3<float>& r)
+	Vector3f(const Vector3<double>& r)
 	{
 		(*this)[0] = r[0];
 		(*this)[1] = r[1];
 		(*this)[2] = r[2];
 	}
 
-	inline float Length() const { return sqrtf(GetX() * GetX() + GetY() * GetY() + GetZ() * GetZ()); }
-	inline float Dot(const Vector3f& v) const { return GetX() * v.GetX() + GetY() * v.GetY() + GetZ() * v.GetZ(); }
+	inline double Length() const { return sqrtf(GetX() * GetX() + GetY() * GetY() + GetZ() * GetZ()); }
+	inline double Dot(const Vector3f& v) const { return GetX() * v.GetX() + GetY() * v.GetY() + GetZ() * v.GetZ(); }
 
 	inline Vector3f Cross(const Vector3f& v) const
 	{
-		const float _x = GetY() * v.GetZ() - GetZ() * v.GetY();
-		const float _y = GetZ() * v.GetX() - GetX() * v.GetZ();
-		const float _z = GetX() * v.GetY() - GetY() * v.GetX();
+		const double _x = GetY() * v.GetZ() - GetZ() * v.GetY();
+		const double _y = GetZ() * v.GetX() - GetX() * v.GetZ();
+		const double _z = GetX() * v.GetY() - GetY() * v.GetX();
 
 		return Vector3f(_x, _y, _z);
 	}
 
-	inline Vector3f Rotate(float angle, const Vector3f& axis) const
+	inline Vector3f Rotate(double angle, const Vector3f& axis) const
 	{
-		const float sin = sinf(-angle);
-		const float cos = cosf(-angle);
+		const double sin = sinf(-angle);
+		const double cos = cosf(-angle);
 
 		return this->Cross(axis * sin) +        //Rotation on local X
 			(*this * cos) +                     //Rotation on local Z
 		    axis * this->Dot(axis * (1 - cos)); //Rotation on local Y
 
-//		const float sinHalfAngle = sinf(angle/2);
-//		const float cosHalfAngle = cosf(angle/2);
+//		const double sinHalfAngle = sinf(angle/2);
+//		const double cosHalfAngle = cosf(angle/2);
 //
-//		const float Rx = axis.x * sinHalfAngle;
-//		const float Ry = axis.y * sinHalfAngle;
-//		const float Rz = axis.z * sinHalfAngle;
-//		const float Rw = cosHalfAngle;
+//		const double Rx = axis.x * sinHalfAngle;
+//		const double Ry = axis.y * sinHalfAngle;
+//		const double Rz = axis.z * sinHalfAngle;
+//		const double Rw = cosHalfAngle;
 //
 //		Quaternion rotationQ(Rx, Ry, Rz, Rw);
 //
@@ -701,15 +701,15 @@ public:
 
 	inline Vector3f Normalized() const
 	{
-		const float length = Length();
+		const double length = Length();
 
 		return Vector3f(GetX() / length, GetY() / length, GetZ() / length);
 	}
 
 	inline Vector3f operator+(const Vector3f& r) const { return Vector3f(GetX() + r.GetX(), GetY() + r.GetY(), GetZ() + r.GetZ()); }
 	inline Vector3f operator-(const Vector3f& r) const { return Vector3f(GetX() - r.GetX(), GetY() - r.GetY(), GetZ() - r.GetZ()); }
-	inline Vector3f operator*(float f) const { return Vector3f(GetX() * f, GetY() * f, GetZ() * f); }
-	inline Vector3f operator/(float f) const { return Vector3f(GetX() / f, GetY() / f, GetZ() / f); }
+	inline Vector3f operator*(double f) const { return Vector3f(GetX() * f, GetY() * f, GetZ() * f); }
+	inline Vector3f operator/(double f) const { return Vector3f(GetX() / f, GetY() / f, GetZ() / f); }
 
 	inline bool operator==(const Vector3f& r) const { return GetX() == r.GetX() && GetY() == r.GetY() && GetZ() == r.GetZ(); }
 	inline bool operator!=(const Vector3f& r) const { return !operator==(r); }
@@ -732,7 +732,7 @@ public:
 		return *this;
     }
 
-    inline Vector3f& operator*=(float f)
+    inline Vector3f& operator*=(double f)
     {
 		(*this)[0] *= f;
 		(*this)[1] *= f;
@@ -741,7 +741,7 @@ public:
 		return *this;
     }
 
-	inline Vector3f& operator/=(float f)
+	inline Vector3f& operator/=(double f)
 	{
 		(*this)[0] /= f;
 		(*this)[1] /= f;
@@ -750,26 +750,26 @@ public:
 		return *this;
 	}
 
-	inline float GetX() const { return (*this)[0]; }
-	inline float GetY() const { return (*this)[1]; }
-	inline float GetZ() const { return (*this)[2]; }
+	inline double GetX() const { return (*this)[0]; }
+	inline double GetY() const { return (*this)[1]; }
+	inline double GetZ() const { return (*this)[2]; }
 
-	inline void SetX(float x) { (*this)[0] = x; }
-	inline void SetY(float y) { (*this)[1] = y; }
-	inline void SetZ(float z) { (*this)[2] = z; }
+	inline void SetX(double x) { (*this)[0] = x; }
+	inline void SetY(double y) { (*this)[1] = y; }
+	inline void SetZ(double z) { (*this)[2] = z; }
 
-	inline void Set(float x, float y, float z) { (*this)[0] = x; (*this)[1] = y; (*this)[2] = z; }
+	inline void Set(double x, double y, double z) { (*this)[0] = x; (*this)[1] = y; (*this)[2] = z; }
 private:
-	//float x,y,z;
+	//double x,y,z;
 };
 
 typedef Vector2<int> Vector2i;
 typedef Vector3<int> Vector3i;
 typedef Vector4<int> Vector4i;
 
-typedef Vector2<float> Vector2f;
-//typedef Vector3<float> Vector3f;
-typedef Vector4<float> Vector4f;
+typedef Vector2<double> Vector2f;
+//typedef Vector3<double> Vector3f;
+typedef Vector4<double> Vector4f;
 
 typedef Vector2<double> Vector2d;
 typedef Vector3<double> Vector3d;
@@ -779,18 +779,18 @@ typedef Matrix<int, 2> Matrix2i;
 typedef Matrix3<int> Matrix3i;
 typedef Matrix4<int> Matrix4i;
 
-typedef Matrix<float, 2> Matrix2f;
-typedef Matrix3<float> Matrix3f;
-typedef Matrix4<float> Matrix4f;
+typedef Matrix<double, 2> Matrix2f;
+typedef Matrix3<double> Matrix3f;
+typedef Matrix4<double> Matrix4f;
 
 typedef Matrix<double, 2> Matrix2d;
 typedef Matrix3<double> Matrix3d;
 typedef Matrix4<double> Matrix4d;
 
-class Quaternion : public Vector4<float>
+class Quaternion : public Vector4<double>
 {
 public:
-	Quaternion(float x = 0.0f, float y = 0.0f, float z = 0.0f, float w = 1.0f)
+	Quaternion(double x = 0.0f, double y = 0.0f, double z = 0.0f, double w = 1.0f)
 	{
 		(*this)[0] = x;
 		(*this)[1] = y;
@@ -798,7 +798,7 @@ public:
 		(*this)[3] = w;
 	}
 
-	Quaternion(const Vector4<float>& r)
+	Quaternion(const Vector4<double>& r)
 	{
 		(*this)[0] = r[0];
 		(*this)[1] = r[1];
@@ -806,10 +806,10 @@ public:
 		(*this)[3] = r[3];
 	}
 
-	Quaternion(const Vector3f& axis, float angle)
+	Quaternion(const Vector3f& axis, double angle)
 	{
-		float sinHalfAngle = sinf(angle/2);
-		float cosHalfAngle = cosf(angle/2);
+		double sinHalfAngle = sinf(angle/2);
+		double cosHalfAngle = cosf(angle/2);
 
 		(*this)[0] = axis.GetX() * sinHalfAngle;
 		(*this)[1] = axis.GetY() * sinHalfAngle;
@@ -819,11 +819,11 @@ public:
 
 	Quaternion(const Matrix4f& m)
 	{
-		float trace = m[0][0] + m[1][1] + m[2][2];
+		double trace = m[0][0] + m[1][1] + m[2][2];
 
 		if(trace > 0)
 		{
-			float s = 0.5f / sqrtf(trace + 1.0f);
+			double s = 0.5f / sqrtf(trace + 1.0f);
 			(*this)[3] = 0.25f / s;
 			(*this)[0] = (m[1][2] - m[2][1]) * s;
 			(*this)[1] = (m[2][0] - m[0][2]) * s;
@@ -831,7 +831,7 @@ public:
 		}
 		else if(m[0][0] > m[1][1] && m[0][0] > m[2][2])
 		{
-			float s = 2.0f * sqrtf(1.0f + m[0][0] - m[1][1] - m[2][2]);
+			double s = 2.0f * sqrtf(1.0f + m[0][0] - m[1][1] - m[2][2]);
 			(*this)[3] = (m[1][2] - m[2][1]) / s;
 			(*this)[0] = 0.25f * s;
 			(*this)[1] = (m[1][0] + m[0][1]) / s;
@@ -839,7 +839,7 @@ public:
 		}
 		else if(m[1][1] > m[2][2])
 		{
-			float s = 2.0f * sqrtf(1.0f + m[1][1] - m[0][0] - m[2][2]);
+			double s = 2.0f * sqrtf(1.0f + m[1][1] - m[0][0] - m[2][2]);
 			(*this)[3] = (m[2][0] - m[0][2]) / s;
 			(*this)[0] = (m[1][0] + m[0][1]) / s;
 			(*this)[1] = 0.25f * s;
@@ -847,21 +847,21 @@ public:
 		}
 		else
 		{
-			float s = 2.0f * sqrtf(1.0f + m[2][2] - m[1][1] - m[0][0]);
+			double s = 2.0f * sqrtf(1.0f + m[2][2] - m[1][1] - m[0][0]);
 			(*this)[3] = (m[0][1] - m[1][0]) / s;
 			(*this)[0] = (m[2][0] + m[0][2]) / s;
 			(*this)[1] = (m[1][2] + m[2][1]) / s;
 			(*this)[2] = 0.25f * s;
 		}
 
-		float length = Length();
+		double length = Length();
 		(*this)[3] = (*this)[3] / length;
 		(*this)[0] = (*this)[0] / length;
 		(*this)[1] = (*this)[1] / length;
 		(*this)[2] = (*this)[2] / length;
 	}
 
-	inline Quaternion NLerp(const Quaternion& r, float lerpFactor, bool shortestPath) const
+	inline Quaternion NLerp(const Quaternion& r, double lerpFactor, bool shortestPath) const
 	{
 		Quaternion correctedDest;
 
@@ -873,11 +873,11 @@ public:
 		return Quaternion(Lerp(correctedDest, lerpFactor).Normalized());
 	}
 
-	inline Quaternion SLerp(const Quaternion& r, float lerpFactor, bool shortestPath) const
+	inline Quaternion SLerp(const Quaternion& r, double lerpFactor, bool shortestPath) const
 	{
-		static const float EPSILON = 1e3;
+		static const double EPSILON = 1e3;
 
-		float cos = this->Dot(r);
+		double cos = this->Dot(r);
 		Quaternion correctedDest;
 
 		if(shortestPath && cos < 0)
@@ -891,12 +891,12 @@ public:
 		if(fabs(cos) > (1 - EPSILON))
 			return NLerp(correctedDest, lerpFactor, false);
 
-		float sin = (float)sqrtf(1.0f - cos * cos);
-		float angle = atan2(sin, cos);
-		float invSin = 1.0f/sin;
+		double sin = (double)sqrtf(1.0f - cos * cos);
+		double angle = atan2(sin, cos);
+		double invSin = 1.0f/sin;
 
-		float srcFactor = sinf((1.0f - lerpFactor) * angle) * invSin;
-		float destFactor = sinf((lerpFactor) * angle) * invSin;
+		double srcFactor = sinf((1.0f - lerpFactor) * angle) * invSin;
+		double destFactor = sinf((lerpFactor) * angle) * invSin;
 
 		return Quaternion((*this) * srcFactor + correctedDest * destFactor);
 	}
@@ -944,20 +944,20 @@ public:
 
 	inline Quaternion operator*(const Quaternion& r) const
 	{
-		const float _w = (GetW() * r.GetW()) - (GetX() * r.GetX()) - (GetY() * r.GetY()) - (GetZ() * r.GetZ());
-		const float _x = (GetX() * r.GetW()) + (GetW() * r.GetX()) + (GetY() * r.GetZ()) - (GetZ() * r.GetY());
-		const float _y = (GetY() * r.GetW()) + (GetW() * r.GetY()) + (GetZ() * r.GetX()) - (GetX() * r.GetZ());
-		const float _z = (GetZ() * r.GetW()) + (GetW() * r.GetZ()) + (GetX() * r.GetY()) - (GetY() * r.GetX());
+		const double _w = (GetW() * r.GetW()) - (GetX() * r.GetX()) - (GetY() * r.GetY()) - (GetZ() * r.GetZ());
+		const double _x = (GetX() * r.GetW()) + (GetW() * r.GetX()) + (GetY() * r.GetZ()) - (GetZ() * r.GetY());
+		const double _y = (GetY() * r.GetW()) + (GetW() * r.GetY()) + (GetZ() * r.GetX()) - (GetX() * r.GetZ());
+		const double _z = (GetZ() * r.GetW()) + (GetW() * r.GetZ()) + (GetX() * r.GetY()) - (GetY() * r.GetX());
 
 		return Quaternion(_x, _y, _z, _w);
 	}
 
-	inline Quaternion operator*(const Vector3<float>& v) const
+	inline Quaternion operator*(const Vector3<double>& v) const
 	{
-		const float _w = - (GetX() * v.GetX()) - (GetY() * v.GetY()) - (GetZ() * v.GetZ());
-		const float _x =   (GetW() * v.GetX()) + (GetY() * v.GetZ()) - (GetZ() * v.GetY());
-		const float _y =   (GetW() * v.GetY()) + (GetZ() * v.GetX()) - (GetX() * v.GetZ());
-		const float _z =   (GetW() * v.GetZ()) + (GetX() * v.GetY()) - (GetY() * v.GetX());
+		const double _w = - (GetX() * v.GetX()) - (GetY() * v.GetY()) - (GetZ() * v.GetZ());
+		const double _x =   (GetW() * v.GetX()) + (GetY() * v.GetZ()) - (GetZ() * v.GetY());
+		const double _y =   (GetW() * v.GetY()) + (GetZ() * v.GetX()) - (GetX() * v.GetZ());
+		const double _z =   (GetW() * v.GetZ()) + (GetX() * v.GetY()) - (GetY() * v.GetX());
 
 		return Quaternion(_x, _y, _z, _w);
 	}

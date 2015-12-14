@@ -23,7 +23,7 @@ public:
 	/** Basic getter for m_doesIntersect */
 	inline bool GetDoesIntersect() const { return m_doesIntersect; }
 	/** Basic getter for m_distance */
-	inline float GetDistance()     const { return m_direction.Length(); }
+	inline double GetDistance()     const { return m_direction.Length(); }
 	/** Basic getter */
 	inline const Vector3f& GetDirection() const { return m_direction; }
 private:

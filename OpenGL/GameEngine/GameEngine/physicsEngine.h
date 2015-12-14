@@ -29,7 +29,7 @@ public:
 	 *
 	 * @param delta How much time to simulate.
 	 */
-	void Simulate(float delta);
+	void Simulate(double delta);
 
 	/**
 	 * Finds all objects that have collided since the last step and updates

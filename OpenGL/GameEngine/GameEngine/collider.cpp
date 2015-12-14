@@ -3,6 +3,7 @@
 #include <iostream>
 #include <cstdlib>
 #include "aabb.h"
+#include "plane.h"
 IntersectData Collider::Intersect(const Collider& other) const
 {
 	if(m_type == TYPE_SPHERE && other.GetType() == TYPE_SPHERE)
@@ -10,6 +11,13 @@ IntersectData Collider::Intersect(const Collider& other) const
 		BoundingSphere* self = (BoundingSphere*)this;
 		return self->IntersectBoundingSphere((BoundingSphere&)other);
 	}
+
+	 else if(m_type == TYPE_SPHERE && other.GetType() == TYPE_PLANE)
+	{
+		//BoundingSphere* self = (BoundingSphere*)this;
+//		return other.IntersectSphere((BoundingSphere&)this);
+	}
+
 
 	else if(m_type == TYPE_AABB && other.GetType() == TYPE_AABB)
 	{

@@ -7,10 +7,37 @@
 #include "plane.h"
 #include "physicsObject.h"
 #include "physicsEngine.h"
+#include "collision.h"
+#include "collisionsphere.h"
+#include "collisionplane.h"
+#include <time.h>
+#include <AL/al.h>
+#include <AL/alut.h>
 enum GameState { PLAY, EXIT };
 PhysicsEngine physicsEngine;
 GameState _gameState;
+collision col;
 
+
+bool k1=true;
+double t = 0.0;
+double dt = 0.01;
+int iSecret;
+double currentTime = 0.0;
+double accumulator = 0.0;
+int bSize = 100;
+int numBalls = 45;
+//Position, Radius, Velocity
+
+collisionsphere ob[50];
+collisionplane pLower (0,0,0,bSize,0,0,bSize,0,bSize,0,0,bSize);
+collisionplane pUpper(0,bSize,0,bSize,bSize,0,bSize,bSize,bSize,0,bSize,bSize);
+
+collisionplane pLeft(0,0,0,0,0,bSize,0,bSize,bSize,0,bSize,0);
+collisionplane pRight(bSize,0,0,bSize,0,bSize,bSize,bSize,bSize,bSize,bSize,0);
+
+collisionplane pFront(0,0,0,bSize,0,0,bSize,bSize,0,0,bSize,0);
+collisionplane pBack(0,0,bSize,bSize,0,bSize,bSize,bSize,bSize,0,bSize,bSize);
 
 
 using namespace std;
@@ -20,7 +47,7 @@ MainGame::MainGame()
 {
 	ptr_window = NULL;
 	_windowWidth = 640;
-	_windowHeight = 480;
+	_windowHeight = 640;
 	_xDist = 0;
 	_yDist = 0;
 	_zDist = 0;
@@ -71,6 +98,11 @@ void MainGame::initSystems()
 		fatalError("Could not initialize glew!");
 	}
 
+	// Init openAL
+	alutInit(0, NULL);
+	// Clear Error Code (so we can catch any new errors)
+	//alGetError();
+
 	//Tell SDL that we want a double buffered window so we dont get
 	//any flickering
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
@@ -106,62 +138,40 @@ void MainGame::initSystems()
 void MainGame::run()
 {
 	initSystems();
-	obj.load("Models/Docahedron.obj");
-	obj2.load("Models/Docahedron.obj");
+	_obn1 = obj.load("Models/sphere.obj");
+	_obn2 = obj2.load("Models/sphere.obj");
 
-	BoundingSphere sphere1(Vector3f(10.0f,0.0f,0.0f),1.0f);
-    BoundingSphere sphere2(Vector3f(0.0f,3.0f,0.0f),1.0f);
-	BoundingSphere sphere3(Vector3f(0.0f,0.0f,2.0f),1.0f);
-	BoundingSphere sphere4(Vector3f(1.0f,0.0f,0.0f),1.0f);
-/*
-	IntersectData sphereIntersectSphere2 = sphere1.IntersectBoundingSphere(sphere2);
-    IntersectData sphereIntersectSphere3 = sphere1.IntersectBoundingSphere(sphere3);
-	IntersectData sphereIntersectSphere4 = sphere1.IntersectBoundingSphere(sphere4);
-
-	cout<<"Sphere 1 intersects sphere2: "<< sphereIntersectSphere2.GetDoesIntersect()<<sphereIntersectSphere2.GetDistance()<<endl;
-    cout<<"Sphere 1 intersects sphere3: "<< sphereIntersectSphere3.GetDoesIntersect()<<sphereIntersectSphere3.GetDistance()<<endl;
-	cout<<"Sphere 1 intersects sphere4: "<< sphereIntersectSphere4.GetDoesIntersect()<<sphereIntersectSphere4.GetDistance()<<endl;
-
-
-/*
-    AABB aabb1(Vector3d(0.0,0.0,0.0),Vector3d(1.0,1.0,1.0));
-    AABB aabb2(Vector3d(1.0,1.0,1.0),Vector3d(2.0,2.0,2.0));
-    AABB aabb3(Vector3d(1.0,0.0,0.0),Vector3d(2.0,1.0,1.0));
-    AABB aabb4(Vector3d(0.0,0.0,-2.0),Vector3d(1.0,1.0,-1.0));
-    AABB aabb5(Vector3d(0.0,0.5,0.0),Vector3d(1.0,1.5,1.0));
-
-    IntersectData aabb1Intersectaabb2 = aabb1.IntersectAABB(aabb2);
-    IntersectData aabb1Intersectaabb3 = aabb1.IntersectAABB(aabb3);
-    IntersectData aabb1Intersectaabb4 = aabb1.IntersectAABB(aabb4);
-    IntersectData aabb1Intersectaabb5 = aabb1.IntersectAABB(aabb5);
+	for(int i=0;i<numBalls;i++)
+	{
+        _obn[i] = objList[i].load("Models/sphere.obj");
+	}
+    srand (time(NULL));
+    float posRandX;
+    float posRandY;
+    float posRandZ;
+    float velRandX;
+    float velRandY;
+    float velRandZ;
+    posRandX = 2;
+    posRandY = 2;
 
 
-    cout<<"AABB1 intersect AABB2 : "<<aabb1Intersectaabb2.GetDoesIntersect()<<"Distance:"<<aabb1Intersectaabb2.GetDistance()<<endl;
-    cout<<"AABB1 intersect AABB3 : "<<aabb1Intersectaabb3.GetDoesIntersect()<<"Distance:"<<aabb1Intersectaabb3.GetDistance()<<endl;
-    cout<<"AABB1 intersect AABB4 : "<<aabb1Intersectaabb4.GetDoesIntersect()<<"Distance:"<<aabb1Intersectaabb4.GetDistance()<<endl;
-    cout<<"AABB1 intersect AABB5 : "<<aabb1Intersectaabb5.GetDoesIntersect()<<"Distance:"<<aabb1Intersectaabb5.GetDistance()<<endl;
+    for(int i=0;i<numBalls;i++)
+    {
+    //    posRandX = rand() % bSize + 1  ;
+     //   posRandY = rand() % bSize  +1 ;
+        posRandZ = rand() % bSize  +1 ;
+        velRandX = rand() % 30 + 1;
+        velRandY = rand() % 30 + 1;
+        velRandZ = rand() % 10 + 1 ;
+       // cout<<posRandZ<<endl;
+        ob[i].setValues(vector3d( posRandX,posRandY,2),1.1,vector3d(velRandX,velRandY,0));
+	posRandX +=1.5;
+	posRandY +=1.5;
+	//cout<<"X:"<<posRandX<<endl;
+    }
 
-*/
-  /*  Plane plane1(Vector3d(0.0,1.0,0.0),0.0);
-
-    IntersectData plane1IntersectSphere1 = plane1.IntersectSphere(sphere1);
-    IntersectData plane1IntersectSphere2 = plane1.IntersectSphere(sphere2);
-    IntersectData plane1IntersectSphere3 = plane1.IntersectSphere(sphere3);
-    IntersectData plane1IntersectSphere4 = plane1.IntersectSphere(sphere4);
-
-    cout<<"Plane1 intersect Sphere1:" <<plane1IntersectSphere1.GetDoesIntersect()<<"Distance"<<plane1IntersectSphere1.GetDistance()<<endl;
-    cout<<"Plane1 intersect Sphere2:" <<plane1IntersectSphere2.GetDoesIntersect()<<"Distance"<<plane1IntersectSphere2.GetDistance()<<endl;
-    cout<<"Plane1 intersect Sphere3:" <<plane1IntersectSphere3.GetDoesIntersect()<<"Distance"<<plane1IntersectSphere3.GetDistance()<<endl;
-    cout<<"Plane1 intersect Sphere4:" <<plane1IntersectSphere4.GetDoesIntersect()<<"Distance"<<plane1IntersectSphere4.GetDistance()<<endl;
-
-*/
-
-
-   physicsEngine.AddObject(PhysicsObject(new BoundingSphere(Vector3f(10,1.5,0),1),Vector3f(-2,0,0)));
-   physicsEngine.AddObject(PhysicsObject(new BoundingSphere(Vector3f(-10,0,0),1),Vector3f(1,0,0)));
-
-
-
+   
 
 
 
@@ -175,7 +185,6 @@ void MainGame::gameLoop()
 	//Will loop until we set _gameState to EXIT
 	while (_gameState != EXIT)
 	{
-		float _startTicks = SDL_GetTicks();
 		processInput();
 		draw();
 
@@ -183,23 +192,32 @@ void MainGame::gameLoop()
 		{
             net->Send(&mainCam);
         }
-		calculateFPS();
-		//print only once every 10 frames
-		static int _frameCounter = 0;
-		_frameCounter++;
-		if (_frameCounter == 10)
-		{
-			//	cout << _fps << endl;
-			_frameCounter = 0;
-		}
 
-		float _frameTicks = SDL_GetTicks() - _startTicks;
 
-		//limit FPS to max FPS
-		if (1000.0f / _maxFPS > _frameTicks)
-		{
-			SDL_Delay(1000.0f / _maxFPS - _frameTicks);
-		}
+
+
+        double newTime = SDL_GetTicks();
+        double frameTime = newTime - currentTime;
+        if ( frameTime > 0.25 )
+             frameTime = 0.25;
+        currentTime = newTime;
+
+        accumulator += frameTime;
+
+        while ( accumulator >= dt )
+        {
+            for(int i=0;i<numBalls;i++)
+            {
+                ob[i].integrate(t,dt);
+                t += dt;
+                accumulator -= dt;
+            }
+        }
+
+
+
+
+
 	}
 }
 
@@ -309,20 +327,67 @@ void MainGame::draw()
 	glTranslatef(mainCam.camX*-1, mainCam.camY*-1, mainCam.camZ*-1);
 
 
-	glPushMatrix();
-	glTranslatef(physicsEngine.GetObject(0).GetPosition().GetX(), physicsEngine.GetObject(0).GetPosition().GetY(), physicsEngine.GetObject(0).GetPosition().GetZ());
-	obj.Draw();
-	glPopMatrix();
-	glPushMatrix();
-	glTranslatef(physicsEngine.GetObject(1).GetPosition().GetX(), physicsEngine.GetObject(1).GetPosition().GetY(), physicsEngine.GetObject(1).GetPosition().GetZ());
-	obj2.Draw();
-	glPopMatrix();
-    physicsEngine.Simulate(0.02);
-    physicsEngine.HandleCollisions();
-	/*glPushMatrix();
-	glTranslatef(5, 5, 0);
-	obj3.Draw();
-	glPopMatrix();*/
+
+
+    for(int i=0;i<numBalls;i++)
+    {
+        glPushMatrix();
+        glTranslatef(ob[i].getX(),ob[i].getY(),ob[i].getZ());
+        ob[i].render();
+        glCallList(_obn[i]);
+        glPopMatrix();
+    }
+
+    //cout<<"ob1: "<<ob[0].velocity<< " "<<ob[0].getZ()<<endl;
+
+   for(int i=0;i<numBalls;i++)
+   {
+        for(int j=i+1;j<numBalls;j++)
+        {
+            if(col.spheresphere(&ob[i],&ob[j]))
+            {
+                col.spheresphereResponse(&ob[i],&ob[j]);
+            }
+        }
+    }
+    for(int i=0;i<numBalls;i++)
+   {
+        if(col.sphereplane(&pUpper,&ob[i]))
+        {
+            cout<<"collision upper"<<endl;
+        }
+        else if(col.sphereplane(&pLower,&ob[i]))
+        {
+            cout<<"collision lower"<<endl;
+        }
+
+        else if(col.sphereplane(&pLeft,&ob[i]))
+        {
+           cout<<"collision left"<<endl;
+        }
+
+
+        else if(col.sphereplane(&pRight,&ob[i]))
+        {
+            cout<<"collision right"<<endl;
+        }
+
+        else if(col.sphereplane(&pFront,&ob[i]))
+        {
+            cout<<"collision front"<<endl;
+        }
+
+        else if(col.sphereplane(&pBack,&ob[i]))
+        {
+            cout<<"collision back"<<endl;
+        }
+	
+	
+
+   }
+
+
+
 
 	SDL_GL_SwapWindow(ptr_window);
 
@@ -376,4 +441,13 @@ void MainGame::calculateFPS()
 	{
 		_fps = 60;
 	}
+}
+
+
+
+int main(int argc, char **argv)
+{
+    MainGame maingame;
+    maingame.run();
+    return 0;
 }

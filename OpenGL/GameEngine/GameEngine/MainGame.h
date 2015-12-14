@@ -1,7 +1,7 @@
 #pragma once
 #include <SDL2/SDL.h>
 #include <GL/glew.h>
-#include "ObjLoader.h"
+#include "objLoader.h"
 #include "Camera.h"
 #include "MainGame.h"
 #include "Network.h"
@@ -20,6 +20,12 @@ public:
 	void mouseLook(int, int);
 	ObjLoader obj;
 	ObjLoader obj2;
+	ObjLoader obj3;
+	ObjLoader objList[50];
+	int _obn1;
+	int _obn2;
+	int _obn3;
+	int _obn[50];
 	Camera mainCam;
 	ObjLoader cam;
 	float _xDist;

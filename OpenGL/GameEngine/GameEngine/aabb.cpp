@@ -13,7 +13,7 @@ IntersectData AABB::IntersectAABB(const AABB& other) const
 	//particular axis.
 	Vector3f distances = Vector3f(distances1.Max(distances2));
 
-	float maxDistance = distances.Max();
+	double maxDistance = distances.Max();
 
 	//If there is any distance between the two AABB's, then max distance will
 	//be greather than or equal to 0. If there is distance between the two

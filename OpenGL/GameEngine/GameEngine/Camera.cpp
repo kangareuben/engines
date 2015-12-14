@@ -5,9 +5,9 @@
 Camera::Camera()
 {
     id=-1;
-	camX = 0.0f;
+	camX = 5.0f;
 	camY = 0.0f;
-	camZ = 0.0f;
+	camZ = 20.0f;
 	bool mouseIn = true;
 }
 

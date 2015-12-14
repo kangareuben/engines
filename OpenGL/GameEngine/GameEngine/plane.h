@@ -9,7 +9,7 @@
  * The Plane class represents an infinitely large plane that can be used as
  * a collider in a physics engine.
  */
-class Plane
+class Plane : public Collider
 {
 public:
 	/**
@@ -19,7 +19,8 @@ public:
 	 * @param distance The distance to the plane from the world origin
 	 *                   along the normal
 	 */
-	Plane(const Vector3f& normal, float distance) :
+	Plane(const Vector3f& normal, double distance) :
+        Collider(Collider::TYPE_PLANE),
 		m_normal(normal),
 		m_distance(distance) {}
 
@@ -38,7 +39,7 @@ public:
 	IntersectData IntersectSphere(const BoundingSphere& other) const;
 
 	inline const Vector3f& GetNormal() const { return m_normal; }
-	inline float GetDistance()         const { return m_distance; }
+	inline double GetDistance()         const { return m_distance; }
 
 	/** Performs a Unit Test of this class */
 	static void Test();
@@ -46,7 +47,7 @@ private:
 	/** The "up" direction from the plane's surface. */
 	const Vector3f m_normal;
 	/** The distance to the plane from the world origin along the normal */
-	const float    m_distance;
+	const double    m_distance;
 };
 
 #endif

@@ -3,7 +3,7 @@
 
 Plane Plane::Normalized() const
 {
-	float magnitude = m_normal.Length();
+	double magnitude = m_normal.Length();
 
 	//Dividing the normal by it's length performs vector normalization.
 	//Distance however, must also be divided by the normal's length in
@@ -21,13 +21,13 @@ IntersectData Plane::IntersectSphere(const BoundingSphere& other) const
 	//
 	//The end result of this is how far the Sphere's center is from the Plane.
 	//The absolute value is taken so that this result is always positive.
-	float distanceFromSphereCenter =
-		(float)fabs(m_normal.Dot(other.GetCenter()) + m_distance);
+	double distanceFromSphereCenter =
+		(double)fabs(m_normal.Dot(other.GetCenter()) + m_distance);
 
 	//As long as the distanceFromSphereCenter is valid and positive, then
 	//the distance from the sphere can be calculated simply by subtracting
 	//it's radius.
-	float distanceFromSphere = distanceFromSphereCenter - other.GetRadius();
+	double distanceFromSphere = distanceFromSphereCenter - other.GetRadius();
 
 	//The only time the plane can be intersecting the sphere is if the sphere
 	//has less than 0 distance from the plane. Otherwise, if there is distance
