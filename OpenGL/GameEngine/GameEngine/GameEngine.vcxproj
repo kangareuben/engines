@@ -54,32 +54,33 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(SolutionDir)\GL\include;$(SolutionDir)\SDL\include;$(SolutionDir)\SOIL\include;D:\boost_1_59_0;$(IncludePath)</IncludePath>
-    <LibraryPath>D:\boost_1_59_0\libs;D:\boost\boost_1_59_0\libs\thread;$(SolutionDir)\SDL\lib;$(SolutionDir)\GL\lib;$(SolutionDir)\SOIL\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)\GL\include;$(SolutionDir)\SDL\include;D:\boost_1_59_0;D:\Program Files (x86)\OpenAL 1.1 SDK\include;$(SolutionDir)\SDL_net\include;D:\imgui;D:\SOIL\include;$(IncludePath)</IncludePath>
+    <LibraryPath>D:\boost_1_59_0\libs;D:\boost\boost_1_59_0\libs\thread;$(SolutionDir)\SDL\lib;$(SolutionDir)\GL\lib;D:\Program Files (x86)\OpenAL 1.1 SDK\libs\Win64;$(SolutionDir)\SDL_net\lib\x64;D:\SOIL\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(SolutionDir)\GL\include;$(SolutionDir)\SDL\include;$(SolutionDir)\SOIL\include;D:\boost_1_59_0;$(IncludePath)</IncludePath>
-    <LibraryPath>D:\boost_1_59_0\libs;D:\boost\boost_1_59_0\libs\thread;$(SolutionDir)\SDL\lib;$(SolutionDir)\GL\lib;$(SolutionDir)\SOIL\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)\GL\include;$(SolutionDir)\SDL\include;D:\boost_1_59_0;D:\Program Files (x86)\OpenAL 1.1 SDK\include;$(SolutionDir)\SDL_net\include;D:\imgui;D:\SOIL\include;$(IncludePath)</IncludePath>
+    <LibraryPath>D:\boost_1_59_0\libs;D:\boost\boost_1_59_0\libs\thread;$(SolutionDir)\SDL\lib;$(SolutionDir)\GL\lib;D:\Program Files (x86)\OpenAL 1.1 SDK\libs\Win64;$(SolutionDir)\SDL_net\lib\x64;D:\SOIL\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(SolutionDir)\GL\include;$(SolutionDir)\SDL\include;$(SolutionDir)\SOIL\include;D:\boost_1_59_0;$(IncludePath)</IncludePath>
-    <LibraryPath>D:\boost_1_59_0\libs;D:\boost\boost_1_59_0\libs\thread;$(SolutionDir)\SDL\lib;$(SolutionDir)\GL\lib;$(SolutionDir)\SOIL\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)\GL\include;$(SolutionDir)\SDL\include;D:\boost_1_59_0;D:\Program Files (x86)\OpenAL 1.1 SDK\include;$(SolutionDir)\SDL_net\include;D:\imgui;D:\SOIL\include;$(IncludePath)</IncludePath>
+    <LibraryPath>D:\boost_1_59_0\libs;D:\boost\boost_1_59_0\libs\thread;$(SolutionDir)\SDL\lib;$(SolutionDir)\GL\lib;D:\Program Files (x86)\OpenAL 1.1 SDK\libs\Win64;$(SolutionDir)\SDL_net\lib\x64;D:\SOIL\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(SolutionDir)\GL\include;$(SolutionDir)\SDL\include;$(SolutionDir)\SOIL\include;D:\boost_1_59_0;$(IncludePath)</IncludePath>
-    <LibraryPath>D:\boost_1_59_0\libs;D:\boost\boost_1_59_0\libs\thread;$(SolutionDir)\SDL\lib;$(SolutionDir)\GL\lib;$(SolutionDir)\SOIL\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)\GL\include;$(SolutionDir)\SDL\include;D:\boost_1_59_0;D:\Program Files (x86)\OpenAL 1.1 SDK\include;$(SolutionDir)\SDL_net\include;D:\imgui;D:\SOIL\include;$(IncludePath)</IncludePath>
+    <LibraryPath>D:\boost_1_59_0\libs;D:\boost\boost_1_59_0\libs\thread;$(SolutionDir)\SDL\lib;$(SolutionDir)\GL\lib;D:\Program Files (x86)\OpenAL 1.1 SDK\libs\Win64;$(SolutionDir)\SDL_net\lib\x64;D:\SOIL\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2test.lib;glew32s.lib;glew32.lib;opengl32.lib;SOIL.lib;glu32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2test.lib;glew32s.lib;glew32.lib;opengl32.lib;SOIL.lib;glu32.lib;openal32.lib;SDL2_net.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
-      <AdditionalLibraryDirectories>$(SolutionDir)SOIL\lib;$(SolutionDir)GL\lib;$(SolutionDir)SDL\lib;D:\boost_1_59_0\stage\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)GL\lib;$(SolutionDir)SDL\lib;D:\boost_1_59_0\stage\lib;D:\Program Files (x86)\OpenAL 1.1 SDK\libs;$(SolutionDir)SDL_net\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -89,42 +90,103 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2test.lib;glew32s.lib;glew32.lib;opengl32.lib;SOIL.lib;glu32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2test.lib;glew32s.lib;glew32.lib;opengl32.lib;SOIL.lib;glu32.lib;openal32.lib;SDL2_net.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
-      <AdditionalLibraryDirectories>$(SolutionDir)SOIL\lib;$(SolutionDir)GL\lib;$(SolutionDir)SDL\lib;D:\boost_1_59_0\stage\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)GL\lib;$(SolutionDir)SDL\lib;D:\boost_1_59_0\stage\lib;D:\Program Files (x86)\OpenAL 1.1 SDK\libs;$(SolutionDir)SDL_net\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Link>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2test.lib;glew32s.lib;glew32.lib;opengl32.lib;SOIL.lib;glu32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)SOIL\lib;$(SolutionDir)GL\lib;$(SolutionDir)SDL\lib;D:\boost_1_59_0\stage\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2test.lib;glew32s.lib;glew32.lib;opengl32.lib;SOIL.lib;glu32.lib;openal32.lib;SDL2_net.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)GL\lib;$(SolutionDir)SDL\lib;D:\boost_1_59_0\stage\lib;D:\Program Files (x86)\OpenAL 1.1 SDK\libs;$(SolutionDir)SDL_net\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <ClCompile>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Link>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2test.lib;glew32s.lib;glew32.lib;opengl32.lib;SOIL.lib;glu32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)SOIL\lib;$(SolutionDir)GL\lib;$(SolutionDir)SDL\lib;D:\boost_1_59_0\stage\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2test.lib;glew32s.lib;glew32.lib;opengl32.lib;SOIL.lib;glu32.lib;openal32.lib;SDL2_net.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)GL\lib;$(SolutionDir)SDL\lib;D:\boost_1_59_0\stage\lib;D:\Program Files (x86)\OpenAL 1.1 SDK\libs;$(SolutionDir)SDL_net\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <SubSystem>Console</SubSystem>
     </Link>
+    <ClCompile>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="aabb.cpp" />
+    <ClCompile Include="aldlist.cpp" />
+    <ClCompile Include="ALFramework.cpp" />
+    <ClCompile Include="AudioManager.cpp" />
+    <ClCompile Include="boundingSphere.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="collider.cpp" />
+    <ClCompile Include="collision.cpp" />
+    <ClCompile Include="collisionplane.cpp" />
+    <ClCompile Include="collisionsphere.cpp" />
     <ClCompile Include="Errors.cpp" />
+    <ClCompile Include="imgui.cpp" />
+    <ClCompile Include="imgui_demo.cpp" />
+    <ClCompile Include="imgui_draw.cpp" />
+    <ClCompile Include="imgui_impl_sdl.cpp" />
+    <ClCompile Include="intersectData.cpp" />
+    <ClCompile Include="LoadOAL.cpp" />
+    <ClCompile Include="main.cpp" />
     <ClCompile Include="MainGame.cpp" />
+    <ClCompile Include="math3d.cpp" />
+    <ClCompile Include="Network.cpp" />
+    <ClCompile Include="ObjAI.cpp" />
+    <ClCompile Include="Object.cpp" />
     <ClCompile Include="ObjLoader.cpp" />
+    <ClCompile Include="ObjPhysics.cpp" />
+    <ClCompile Include="physicsEngine.cpp" />
+    <ClCompile Include="physicsObject.cpp" />
+    <ClCompile Include="plane.cpp" />
+    <ClCompile Include="referenceCounter.cpp" />
     <ClCompile Include="Source.cpp" />
+    <ClCompile Include="CWaves.cpp" />
+    <ClCompile Include="vector3d.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="aabb.h" />
+    <ClInclude Include="aldlist.h" />
+    <ClInclude Include="ALFramework.h" />
+    <ClInclude Include="AudioManager.h" />
+    <ClInclude Include="boundingSphere.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="collider.h" />
+    <ClInclude Include="collision.h" />
+    <ClInclude Include="collisionplane.h" />
+    <ClInclude Include="collisionsphere.h" />
     <ClInclude Include="Errors.h" />
+    <ClInclude Include="imconfig.h" />
+    <ClInclude Include="imgui.h" />
+    <ClInclude Include="imgui_impl_sdl.h" />
+    <ClInclude Include="imgui_internal.h" />
+    <ClInclude Include="intersectData.h" />
+    <ClInclude Include="LoadOAL.h" />
     <ClInclude Include="MainGame.h" />
+    <ClInclude Include="math3d.h" />
+    <ClInclude Include="Network.h" />
+    <ClInclude Include="ObjAI.h" />
+    <ClInclude Include="Object.h" />
     <ClInclude Include="ObjLoader.h" />
+    <ClInclude Include="ObjPhysics.h" />
+    <ClInclude Include="CWaves.h" />
+    <ClInclude Include="physicsEngine.h" />
+    <ClInclude Include="physicsObject.h" />
+    <ClInclude Include="plane.h" />
+    <ClInclude Include="referenceCounter.h" />
+    <ClInclude Include="vector3d.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

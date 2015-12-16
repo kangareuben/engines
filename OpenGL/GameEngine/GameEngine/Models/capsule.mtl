@@ -5,7 +5,7 @@ newmtl material0
 Ka 1.000000 1.000000 1.000000
 Kd 1.000000 1.000000 1.000000
 Ks 0.000000 0.000000 0.000000
-map_Kd Models/capsule.jpg
+map_Kd Models/capsule.bmp
 Tr 1.000000
 illum 1
 Ns 0.000000

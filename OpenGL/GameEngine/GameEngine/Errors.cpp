@@ -2,8 +2,8 @@
 #include "iostream"
 #include <cstdlib>
 #include "string"
-#include <SDL\SDL.h>
-#include <GL\glew.h>
+#include <SDL.h>
+#include <glew.h>
 using namespace std;
 void fatalError(string errorString)
 {

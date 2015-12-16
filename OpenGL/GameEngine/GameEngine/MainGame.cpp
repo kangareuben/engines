@@ -1,102 +1,50 @@
 #include "MainGame.h"
 #include "Errors.h"
 #include "iostream"
-#include <random>
+#include "ObjLoader.h"
+#include "boundingSphere.h"
+#include "aabb.h"
+#include "plane.h"
+#include "physicsObject.h"
+#include "physicsEngine.h"
+#include "collision.h"
+#include "collisionsphere.h"
+#include "collisionplane.h"
+#include <time.h>
 
-//global pointer point to mainGame
-MainGame* g_pMainGame = NULL;
+enum GameState { PLAY, EXIT };
+PhysicsEngine physicsEngine;
+GameState _gameState;
+collision col;
 
-float t = 0.0f;
-using namespace std;
+bool k1 = true;
+double t = 0.0;
+double dt = 0.01;
+int iSecret;
+double currentTime = 0.0;
 double accumulator = 0.0;
-float dt = 0.0f;
-float ti;
-// 0 - ground
-// 1 - box 
-// 2 - sphere
+int bSize = 100;
+int numBalls = 45;
+//Position, Radius, Velocity
 
-//Physics Thread
-void g_fnPhysicsThread()
-{
-	while (g_pMainGame->_gameState != GameState::EXIT)
-	{
-		const float DESIRED_FPS = 60.0f;
-		const float MS_PER_SECOND = 1000.0f;
-		const float DESIRED_FRAMETIME = MS_PER_SECOND / DESIRED_FPS;
-		const int MAX_PHYSICS_STEPS = 6;
-		const float MAX_DELTA_TIME = 1.0f;
-		float previousTicks = SDL_GetTicks();
+collisionsphere ob[50];
+collisionplane pLower(0, 0, 0, bSize, 0, 0, bSize, 0, bSize, 0, 0, bSize);
+collisionplane pUpper(0, bSize, 0, bSize, bSize, 0, bSize, bSize, bSize, 0, bSize, bSize);
 
-		float newTicks = SDL_GetTicks();
-		float frameTime = newTicks - previousTicks;
-		previousTicks = newTicks;
-		dt = frameTime / DESIRED_FRAMETIME;
+collisionplane pLeft(0, 0, 0, 0, 0, bSize, 0, bSize, bSize, 0, bSize, 0);
+collisionplane pRight(bSize, 0, 0, bSize, 0, bSize, bSize, bSize, bSize, bSize, bSize, 0);
 
-		int i = 0;
+collisionplane pFront(0, 0, 0, bSize, 0, 0, bSize, bSize, 0, 0, bSize, 0);
+collisionplane pBack(0, 0, bSize, bSize, 0, bSize, bSize, bSize, bSize, 0, bSize, bSize);
 
-		while (dt>0.0f && i <MAX_PHYSICS_STEPS)
-		{
-			float deltaTime;
-
-
-			if (dt < MAX_DELTA_TIME)
-				deltaTime = dt;
-			else
-				deltaTime = MAX_DELTA_TIME;
-
-			for (int j = 0; j < g_pMainGame->mapIndex; j++)
-			{
-				if (g_pMainGame->objMap.at(j)->physics->colliderType != 5)
-				{
-					for (int k = j + 1; k < g_pMainGame->mapIndex; k++)
-					{
-						if (g_pMainGame->objMap.at(k)->physics->colliderType != 5)
-						{
-							g_pMainGame->checkCollision(g_pMainGame->objMap.at(j)->physics, g_pMainGame->objMap.at(k)->physics);
-
-							//This was an attempt to use multiple threads per frame for collision detection
-							//It didn't work because too many threads were created and the performance went down
-							/*boost::thread CheckCollisionThread(	&MainGame::checkCollision,	
-																g_pMainGame, 
-																g_pMainGame->objMap.at(j)->physics, 
-																g_pMainGame->objMap.at(k)->physics);*/
-						}
-					}
-				}
-			}
-
-			for (int j = 0; j < g_pMainGame->mapIndex; j++)
-			{
-				g_pMainGame->objMap.at(j)->physics->update(deltaTime);
-			}
-
-			i++;
-			dt -= deltaTime;
-		}
-	}
-}
-
-void g_fnCreateObject(ObjParams* objParams)
-{
-	g_pMainGame->mtx2.lock();
-	g_pMainGame->nLoadThreadCount++;
-	g_pMainGame->mtx2.unlock();
-
-	g_pMainGame->createObject(objParams);
-	delete objParams;
-
-	g_pMainGame->mtx3.lock();
-	g_pMainGame->nLoadThreadCount--;
-	g_pMainGame->mtx3.unlock();
-	//cout << "hi" << endl;
-}
+using namespace std;
+char ip[20];
 
 MainGame::MainGame()
 {
-	currentTime = 0;
-	ptr_window = nullptr;
+	ptr_window = NULL;
 	_windowWidth = 640;
-	_windowHeight = 480;
+	_windowHeight = 640;
 	_xDist = 0;
 	_yDist = 0;
 	_zDist = 0;
@@ -105,18 +53,19 @@ MainGame::MainGame()
 	_xRot = 0;
 	_eyeX = 0;
 	_maxFPS = 60;
-	_mouseVel = 0.2f;
+	_mouseVel = 0.5f;
 	_moveVel = 0.2f;
-	mapIndex = 0;
-	g_pMainGame = this;
-	bIsLoaded = false;
-	nLoadThreadCount = 0;
-	gravityEnabled = true;
-}
+	isOnline = true;
 
+	if (isOnline)
+	{
+		std::cin.getline(ip, 20);
+	}
+}
 
 MainGame::~MainGame()
 {
+
 }
 
 void MainGame::initSystems()
@@ -126,19 +75,19 @@ void MainGame::initSystems()
 
 	//Open an SDL window
 	ptr_window = SDL_CreateWindow("Game Engine", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, _windowWidth, _windowHeight, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
-	if (ptr_window == nullptr)
+	if (ptr_window == NULL)
 	{
 		fatalError("SDL Window could not be created!");
 	}
 
 	//Set up our OpenGL context
 	SDL_GLContext glContext = SDL_GL_CreateContext(ptr_window);
-	if (glContext == nullptr)
+	if (glContext == NULL)
 	{
 		fatalError("SDL_GL context could not be created!");
 	}
 
-	//Set up glew 
+	//Set up glew
 	GLenum error = glewInit();
 	if (error != GLEW_OK)
 	{
@@ -164,94 +113,184 @@ void MainGame::initSystems()
 
 	GLfloat amb_light[] = { 0.1, 0.1, 0.1, 1.0 };
 	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, amb_light);
-	glEnable(GL_LIGHT0);
+	//glLightModelfv(GL_LIGHT_MODEL_TWO_SIDE, amb_light);
 	glEnable(GL_COLOR_MATERIAL);
 	glShadeModel(GL_SMOOTH);
 	glDepthFunc(GL_LEQUAL);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_LIGHTING);
 	glEnable(GL_LIGHT0);
+	glEnable(GL_LIGHT1);
+
+	//Lighting test
+	ambient1 = new GLfloat[4];
+
+	//Disco lighting
+	/*ambient1[0] = 0.2;
+	ambient1[1] = 0.5;
+	ambient1[2] = 0.3;
+	ambient1[3] = 1.0;*/
+
+	ambient1[0] = 0.0;
+	ambient1[1] = 0.0;
+	ambient1[2] = 0.0;
+	ambient1[3] = 1.0;
+
+	glLightfv(GL_LIGHT1, GL_AMBIENT, ambient1);
+	GLfloat diffuse1[] = { 0.1, 0.1, 0.1, 1.0 };
+	glLightfv(GL_LIGHT1, GL_DIFFUSE, diffuse1);
+	GLfloat specular1[] = { 0.1, 0.1, 0.1, 1.0 };
+	glLightfv(GL_LIGHT1, GL_SPECULAR, specular1);
+	/*GLfloat position1[] = { -50, 50, 0, 0.0 };
+	glLightfv(GL_LIGHT1, GL_POSITION, position1);
+	GLfloat direction1[] = { 0, -1, 0 };
+	glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, direction1);
+	GLfloat exponent1 = 128;
+	glLightfv(GL_LIGHT1, GL_SPOT_EXPONENT, &exponent1);
+	GLfloat cutoff1 = 5;
+	glLightfv(GL_LIGHT1, GL_SPOT_CUTOFF, &cutoff1);*/
+	//glEnable(GL_LIGHT1);
+
+	GLfloat ambient2[] = { 1.0, 0.55, 0.0, 1.0 };
+	glLightfv(GL_LIGHT2, GL_AMBIENT, ambient2);
+
+	GLfloat ambient3[] = { 1.0, 1.0, 0.0, 1.0 };
+	glLightfv(GL_LIGHT3, GL_AMBIENT, ambient3);
+
+	GLfloat ambient4[] = { 0.133, 0.545, 0.133, 1.0 };
+	glLightfv(GL_LIGHT4, GL_AMBIENT, ambient4);
+
+	GLfloat ambient5[] = { 0.0, 0.0, 1.0, 1.0 };
+	glLightfv(GL_LIGHT5, GL_AMBIENT, ambient5);
+
+	GLfloat ambient6[] = { 0.294, 0.0, 0.51, 1.0 };
+	glLightfv(GL_LIGHT6, GL_AMBIENT, ambient6);
+
+	GLfloat ambient7[] = { 0.58, 0.0, 0.827, 1.0 };
+	glLightfv(GL_LIGHT7, GL_AMBIENT, ambient7);
+
+	//Set up OpenAL
+	ALFWInit();
+	if (!ALFWInitOpenAL())
+	{
+		ALFWprintf("Failed to initialize OpenAL\n");
+		ALFWShutdown();
+	}
+
+	audioManager = new AudioManager();
+
+//	if (isOnline)
+	//	net = new Network(ip);
+
+	glRotatef(0, 1.0, 0.0, 0.0);
+	glRotatef(-180, 0.0, 1.0, 0.0);
+	glRotatef(-180, 0, 0, 1);
+
+	ImGui_ImplSdl_Init(ptr_window);
+	show_test_window = false;
+	show_another_window = false;
 }
 
 void MainGame::run()
 {
-	
 	initSystems();
-	//file path,initial x, initial y, initial z, gravity true or false, colliderType, width,height,depth,mass
-	
-	//start loading obj
-	bIsLoaded = false;
-	ObjParams* op = new ObjParams();
-	op->setObjParams("Models/box.obj", 2, 20, 20, 1, 1, 1, 1, 0, 0, 0, true, 1);
-	boost::thread t1(&g_fnCreateObject, op);
+	//_obn1 = obj.load("Models/sphere.obj");
+	//_obn2 = obj2.load("Models/sphere.obj");
 
-	/*op = new ObjParams();
-	op->setObjParams("Models/sphere.obj", -2, 20, 20, 1, 1, 1, 2, 0, 0, 0, true, 2);
-	boost::thread t2(&g_fnCreateObject, op);*/
-
-	op = new ObjParams();
-	op->setObjParams("Models/Terrain.obj", 0, 0, 0, 200, 0.001f, 200, 1000, 0, 0, 0, false, 0);
-	boost::thread t3(&g_fnCreateObject, op);
-
-	op = new ObjParams();
-	op->setObjParams("Models/box.obj", 2, 10, 20, 1, 1, 1, 2, 0, 0, 0, false, 1);
-	boost::thread t4(&g_fnCreateObject, op);
-
-	op = new ObjParams();
-	op->setObjParams("Models/box.obj", 10, 0, 20, 1, 1, 1, 3, -0.1f, 0, 0, true, 1);
-	boost::thread t5(&g_fnCreateObject, op);
-
-	op = new ObjParams();
-	op->setObjParams("Models/box.obj", -10, 0, 20, 1, 1, 1, 4, 0.1f, 0, 0, true, 1);
-	boost::thread t6(&g_fnCreateObject, op);
-	
-	std::random_device rd;
-	std::mt19937 mt(rd());
-	std::uniform_real_distribution<double> dist(-0.1f, 0.1f);
-	std::uniform_real_distribution<double> dist2(0.001f, 0.005f);
-
-	
-
-	for (int i = 0; i < 50; i++)
+	for (int i = 0; i<numBalls; i++)
 	{
-		float x, y, z;
-		x = dist(mt);
-		y = dist2(mt);
-		z = dist(mt);
-		
-		op = new ObjParams();
-		op->setObjParams("Models/Particle.obj", 0, 0, 0, 0.001f, 0.001f, 0.001f, 0.1f, x, y, z, false, 5);
-		boost::thread t6(&g_fnCreateObject, op);
-
-		//createObject("Models/Particle.obj", 0, 0, 0, 0.001f, 0.001f, 0.001f, 0.1f, false, 5);
-
-		//objMap.at(mapIndex - 1)->physics->setVelocity(x, y, z);
+		_obn[i] = objList[i].load("Models/sphere.obj");
+		//_obn[i] = objList[i].load("Models/capsule.obj");
 	}
-	bIsLoaded = true;
-	while (nLoadThreadCount != 0)
+	srand(time(NULL));
+	float posRandX;
+	float posRandY;
+	float posRandZ;
+	float velRandX;
+	float velRandY;
+	float velRandZ;
+	posRandX = 2;
+	posRandY = 2;
+
+
+	for (int i = 0; i<numBalls; i++)
 	{
-		cout << "Still waiting for " << nLoadThreadCount << " threads" << endl;
+		//    posRandX = rand() % bSize + 1  ;
+		//   posRandY = rand() % bSize  +1 ;
+		posRandZ = rand() % bSize + 1;
+		velRandX = rand() % 30 + 1;
+		velRandY = rand() % 30 + 1;
+		velRandZ = rand() % 10 + 1;
+		// cout<<posRandZ<<endl;
+		ob[i].setValues(vector3d(posRandX, posRandY, 2), 0.9, vector3d(velRandX, velRandY, 0));
+		posRandX += 1.5;
+		posRandY += 1.5;
+		//cout<<"X:"<<posRandX<<endl;
 	}
-	//start the physics thread first
-	boost::thread PhysicsThread(&g_fnPhysicsThread);
-	//start rendering
+
 	gameLoop();
 }
 
 void MainGame::gameLoop()
 {
 	//Will loop until we set _gameState to EXIT
-	while (_gameState != GameState::EXIT)
+	while (_gameState != EXIT)
 	{
 		processInput();
 		draw();
+
+		//if (isOnline)
+	//	{
+	//		net->Send(&mainCam);
+	//	}
+
+		double newTime = SDL_GetTicks();
+		double frameTime = newTime - currentTime;
+		if (frameTime > 0.25)
+			frameTime = 0.25;
+		currentTime = newTime;
+
+		accumulator += frameTime;
+
+		while (accumulator >= dt)
+		{
+			for (int i = 0; i<numBalls; i++)
+			{
+				ob[i].integrate(t, dt);
+				t += dt;
+				accumulator -= dt;
+			}
+		}
+
+		//Disco lighting
+		/*for (int i = 0; i < 3; i++)
+		{
+			//ambient1[i] += (((float)rand()) / RAND_MAX * 2 - 1) / 5;
+			ambient1[i] += ((float)rand()) / RAND_MAX * .02;
+			if (ambient1[i] >= 1.0)
+			{
+				ambient1[i] = 0.0;
+			}
+		}*/
+		ambient1[0] = lightR;
+		ambient1[1] = lightG;
+		ambient1[2] = lightB;
+		glLightfv(GL_LIGHT1, GL_AMBIENT, ambient1);
 	}
-	
-	//before quit the game, clean the objmap
-	cleanObject();
+
+	//Clean up OpenAL
+	audioManager->Cleanup();
+
+	ALFWShutdownOpenAL();
+	ALFWShutdown();
+	delete audioManager;
+
+	//Clean up lighting
+	delete[] ambient1;
+
+	//Clean up imgui
+	ImGui_ImplSdl_Shutdown();
 }
-
-
 
 void MainGame::processInput()
 {
@@ -281,89 +320,151 @@ void MainGame::processInput()
 			break;
 
 		case SDL_QUIT:
-			_gameState = GameState::EXIT;
+			_gameState = EXIT;
 			break;
 		case SDL_MOUSEMOTION:
 			//	std::cout << evnt.motion.x << " " << evnt.motion.y << std::endl;
 			break;
 
-		case SDL_MOUSEBUTTONDOWN:
+		/*case SDL_MOUSEBUTTONDOWN:
 			mouseIn = true;
 			SDL_ShowCursor(SDL_DISABLE);
-			break;
+			break;*/
 
 
 
 		case SDL_KEYDOWN:
 			switch (evnt.key.keysym.sym)
 			{
-					//Press F1 to go full screen
-				case SDLK_F1:
-					SDL_SetWindowFullscreen(ptr_window, SDL_WINDOW_FULLSCREEN);
-					break;
-					//Press F2 to come back from fullscreen
-					//Use function SDL_SetWindowSize() for custom size window
-				case SDLK_F2:
-					SDL_SetWindowFullscreen(ptr_window, 0);
-					break;
-				case SDLK_ESCAPE:
-					_gameState = GameState::EXIT;
-					break;
-				case SDLK_w:
-					if (mainCam.camPitch != 90 && mainCam.camPitch != -90)
-					{
-						mainCam.moveCamera(_moveVel, 0.0f);
-					}
-					mainCam.moveCameraUp(_moveVel, 0.0f);
-					break;
+				//Press F1 to go full screen
+			case SDLK_F1:
+				SDL_SetWindowFullscreen(ptr_window, SDL_WINDOW_FULLSCREEN);
+				break;
+				//Press F2 to come back from fullscreen
+				//Use function SDL_SetWindowSize() for custom size window
+			case SDLK_F2:
+				SDL_SetWindowFullscreen(ptr_window, 0);
+				break;
+			case SDLK_ESCAPE:
+				_gameState = EXIT;
+				break;
+			case SDLK_w:
+				if (mainCam.camPitch != 90 && mainCam.camPitch != -90)
+				{
+					mainCam.moveCamera(_moveVel, 0.0f);
+				}
+				mainCam.moveCameraUp(_moveVel, 0.0f);
+				break;
 
-				case SDLK_s:
-					if (mainCam.camPitch != 90 && mainCam.camPitch != -90)
-					{
-						mainCam.moveCamera(_moveVel, 180.0f);
-					}
-					mainCam.moveCameraUp(_moveVel, 180.0f);
-					break;
-				case SDLK_p:
-					mouseIn = false;
-					SDL_ShowCursor(SDL_ENABLE);
-					break;
-				case SDLK_a:
-					mainCam.moveCamera(_moveVel, 90.0f);
-					break;
+			case SDLK_s:
+				if (mainCam.camPitch != 90 && mainCam.camPitch != -90)
+				{
+					mainCam.moveCamera(_moveVel, 180.0f);
+				}
+				mainCam.moveCameraUp(_moveVel, 180.0f);
+				break;
+			case SDLK_p:
+				mouseIn = false;
+				SDL_ShowCursor(SDL_ENABLE);
+				break;
+			case SDLK_a:
+				mainCam.moveCamera(_moveVel, 90.0f);
+				break;
 
-				case SDLK_d:
-					mainCam.moveCamera(_moveVel, 270);
-					break;
+			case SDLK_d:
+				mainCam.moveCamera(_moveVel, 270);
+				break;
 
-				//Simple user interaction
-				//Presss g and gravity is toggled
-				case SDLK_g:
-					if (gravityEnabled)
-					{
-						gravityEnabled = false;
-						for (int i = 0; i < mapIndex; i++)
-						{
-							objMap.at(i)->physics->gravity = false;
-							objMap.at(i)->physics->gravityAcceleration = 0.0f;
-						}
-					}
-					else
-					{
-						gravityEnabled = true;
-						for (int i = 0; i < mapIndex; i++)
-						{
-							objMap.at(i)->physics->gravity = true;
-							objMap.at(i)->physics->gravityAcceleration = 0.01f;
-						}
-					}
-					break;
+			//Press q to play a sound
+			case SDLK_q:
+			{
+				ALfloat position[3] = { 0, 0, 0 };
+				ALfloat velocity[3] = { 0, 0, 0 };
+				ALfloat orientation[6] = { 1, 0, 0, 0, 1, 0 };
+				audioManager->Play("thud.wav", position, velocity, orientation);
+				break;
+			}
+
+			case SDLK_1:
+				if (glIsEnabled(GL_LIGHT1))
+				{
+					glDisable(GL_LIGHT1);
+				}
+				else
+				{
+					glEnable(GL_LIGHT1);
+				}
+				break;
+
+			case SDLK_2:
+				if (glIsEnabled(GL_LIGHT2))
+				{
+					glDisable(GL_LIGHT2);
+				}
+				else
+				{
+					glEnable(GL_LIGHT2);
+				}
+				break;
+
+			case SDLK_3:
+				if (glIsEnabled(GL_LIGHT3))
+				{
+					glDisable(GL_LIGHT3);
+				}
+				else
+				{
+					glEnable(GL_LIGHT3);
+				}
+				break;
+
+			case SDLK_4:
+				if (glIsEnabled(GL_LIGHT4))
+				{
+					glDisable(GL_LIGHT4);
+				}
+				else
+				{
+					glEnable(GL_LIGHT4);
+				}
+				break;
+
+			case SDLK_5:
+				if (glIsEnabled(GL_LIGHT5))
+				{
+					glDisable(GL_LIGHT5);
+				}
+				else
+				{
+					glEnable(GL_LIGHT5);
+				}
+				break;
+
+			case SDLK_6:
+				if (glIsEnabled(GL_LIGHT6))
+				{
+					glDisable(GL_LIGHT6);
+				}
+				else
+				{
+					glEnable(GL_LIGHT6);
+				}
+				break;
+
+			case SDLK_7:
+				if (glIsEnabled(GL_LIGHT7))
+				{
+					glDisable(GL_LIGHT7);
+				}
+				else
+				{
+					glEnable(GL_LIGHT7);
+				}
+				break;
 			}
 		}
 	}
 }
-
-
 
 void MainGame::draw()
 {
@@ -371,15 +472,129 @@ void MainGame::draw()
 	glLoadIdentity();
 	mainCam.control(_moveVel, _mouseVel, mouseIn, ptr_window);
 	mainCam.updateCamera();
-	gluLookAt(0, 1, 25, 0, 0, 0, 0, 1, 0);
+	//gluLookAt(0, 1, 25, 0, 0, 0, 0, 1, 0);
+	gluLookAt(50, 50, -150, 50, 50, 0, 0, 1, 0);
 	glTranslatef(mainCam.camX*-1, mainCam.camY*-1, mainCam.camZ*-1);
 
-	for (int i = 0; i < mapIndex; i++)
+	glBegin(GL_LINE_STRIP);
+	glColor3f(0.0, 1.0, 0.0);
+
+	glPointSize(5);
+	glLineWidth(5);
+
+	glVertex3f(0.0, 0.0, 0.0);
+	glVertex3f(100.4, 0.0, 0.0);
+	glVertex3f(100.4, 100.4, 0.0);
+	glVertex3f(0.0, 100.4, 0.0);
+	glVertex3f(0.0, 0.0, 0.0);
+	/*glVertex3f(0.0, 0.0, 100.0);
+	glVertex3f(100.0, 0.0, 100.0);
+	glVertex3f(100.0, 0.0, 0.0);
+	glVertex3f(100.0, 100.0, 0.0);
+	glVertex3f(100.0, 100.0, 100.0);
+	glVertex3f(0.0, 100.0, 100.0);
+	glVertex3f(0.0, 0.0, 0.0);*/
+	
+	glColor3f(1.0, 1.0, 1.0);
+	glEnd();
+
+	/*glBegin(GL_QUADS);
+	glVertex3f(0.0, 0.0, 2.0);
+	glVertex3f(100.4, 0.0, 2.0);
+	glVertex3f(100.4, 100.4, 2.0);
+	glVertex3f(0.0, 100.4, 2.0);
+	glVertex3f(0.0, 0.0, 2.0);
+	glEnd();*/
+
+	for (int i = 0; i<numBalls; i++)
 	{
 		glPushMatrix();
-		objMap.at(i)->Draw(objMap.at(i)->physics);
+		glTranslatef(ob[i].getX(), ob[i].getY(), ob[i].getZ());
+		ob[i].render();
+		glCallList(_obn[i]);
 		glPopMatrix();
 	}
+
+	for (int i = 0; i<numBalls; i++)
+	{
+		for (int j = i + 1; j<numBalls; j++)
+		{
+			if (col.spheresphere(&ob[i], &ob[j]))
+			{
+				col.spheresphereResponse(&ob[i], &ob[j]);
+				audioManager->Play("ow.wav");
+			}
+		}
+	}
+	for (int i = 0; i<numBalls; i++)
+	{
+		if (col.sphereplane(&pUpper, &ob[i]))
+		{
+			//cout << "collision upper" << endl;
+			//audioManager->Play("tick.wav");
+		}
+		else if (col.sphereplane(&pLower, &ob[i]))
+		{
+			//cout << "collision lower" << endl;
+			//audioManager->Play("tick.wav");
+		}
+
+		else if (col.sphereplane(&pLeft, &ob[i]))
+		{
+			//cout << "collision left" << endl;
+			//audioManager->Play("tick.wav");
+		}
+
+
+		else if (col.sphereplane(&pRight, &ob[i]))
+		{
+			//cout << "collision right" << endl;
+			//audioManager->Play("tick.wav");
+		}
+
+		else if (col.sphereplane(&pFront, &ob[i]))
+		{
+			//cout << "collision front" << endl;
+			//audioManager->Play("tick.wav");
+		}
+
+		else if (col.sphereplane(&pBack, &ob[i]))
+		{
+			//cout << "collision back" << endl;
+			//audioManager->Play("tick.wav");
+		}
+	}
+
+	ImGui_ImplSdl_NewFrame(ptr_window);
+
+	{
+		ImGui::Text("hello world");
+		ImGui::SliderFloat("red", &lightR, 0.0f, 1.0f);
+		ImGui::SliderFloat("green", &lightG, 0.0f, 1.0f);
+		ImGui::SliderFloat("blue", &lightB, 0.0f, 1.0f);
+		//ImGui::ColorEdit3("clear color", (float*)&clear_color);
+		if (ImGui::Button("Test Window")) show_test_window ^= 1;
+		if (ImGui::Button("Another Window")) show_another_window ^= 1;
+		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+
+	}
+
+	if (show_another_window)
+	{
+		ImGui::SetNextWindowSize(ImVec2(200, 100), ImGuiSetCond_FirstUseEver);
+		ImGui::Begin("Another Window", &show_another_window);
+		ImGui::Text("hello");
+		ImGui::End();
+
+	}
+
+	if (show_test_window)
+	{
+		ImGui::SetNextWindowPos(ImVec2(650, 20), ImGuiSetCond_FirstUseEver);
+		ImGui::ShowTestWindow(&show_test_window);
+	}
+
+	ImGui::Render();
 
 	SDL_GL_SwapWindow(ptr_window);
 
@@ -435,176 +650,11 @@ void MainGame::calculateFPS()
 	}
 }
 
-bool MainGame :: checkCollision(ObjPhysics *objA, ObjPhysics *objB)
+
+
+int main(int argc, char **argv)
 {
-	int flag = 0;
-
-	if (objA->colliderType == 1 && objB->colliderType == 0)
-	{
-		if (fabs(objA->position[0] - objB->position[0]) > (objA->width / 2 + objB->width / 2)) flag = 0;
-		else if (fabs(objA->position[1] - objB->position[1]) > (objA->height / 2 + objB->height / 2)) flag = 0;
-		else if (fabs(objA->position[2] - objB->position[2]) > (objA->depth / 2 + objB->depth / 2)) flag = 0;
-		else flag = 1;
-		if (flag == 1)
-		{
-			objA->velocity[0] *= -1; objA->velocity[1] *= -1; objA->velocity[2] *= -1;
-	
-			return true;
-		}
-
-		else
-			return false;
-	}
-
-	if (objA->colliderType == 1 && objB->colliderType == 1)
-	{
-		if (fabs(objA->position[0] - objB->position[0]) > (objA->width / 2 + objB->width / 2)) flag = 0;
-		else if (fabs(objA->position[1] - objB->position[1]) > (objA->height / 2 + objB->height / 2)) flag = 0;
-		else if (fabs(objA->position[2] - objB->position[2]) > (objA->depth / 2 + objB->depth / 2)) flag = 0;
-		else flag = 1;
-		if (flag == 1)
-		{
-		//	float m1 = objA->mass / (objA->mass + objB->mass);
-		//	float m1 = objA->mass / (objA->mass + objB->mass);
-
-			float temp0 = objA->velocity[0];
-			float temp1 = objA->velocity[1];
-			float temp2 = objA->velocity[2];
-			objA->velocity[0] = -1 * objB->velocity[0]; objA->velocity[1] = -1 * objB->velocity[1]; objA->velocity[2] = -1 * objB->velocity[2];
-			objB->velocity[0] = -1 * temp0; objB->velocity[1] = -1 * temp1; objB->velocity[2] = -1 * temp2;
-
-			return true;
-		}
-
-		else
-			return false;
-	}
-
-	else if (objA->colliderType == 2 && objB->colliderType == 0)
-	{
-		double squaredDistance;
-		auto check = [&](
-			const double pn,
-			const double bmin,
-			const double bmax) -> double
-		{
-			double out = 0;
-			double v = pn;
-
-			if (v < bmin)
-			{
-				double val = (bmin - v);
-				out += val * val;
-			}
-
-			if (v > bmax)
-			{
-				double val = (v - bmax);
-				out += val * val;
-			}
-
-			return out;
-		};
-
-		// Squared distance
-		double sq = 0.0;
-
-		sq += check(objA->position[0], objB->point1[0], objB->point8[0]);
-		sq += check(objA->position[1], objB->point1[1], objB->point8[1]);
-		sq += check(objA->position[2], objB->point1[2], objB->point8[2]);
-
-		squaredDistance = sq;
-		if (squaredDistance <= (objA->width * objA->width) == true)
-		{
-			//objA->reverseSpeed();
-			objA->velocity[0] *= -1; objA->velocity[1] *= -1; objA->velocity[2] *= -1;
-
-			objB->velocity[0] *= -1; objB->velocity[1] *= -1; objB->velocity[2] *= -1;
-
-		//	objB->reverseSpeed();
-			
-		}
-		//cout << "squaredDistance = " << squaredDistance << "    width squared = " << objA->width * objA->width << endl;
-		return squaredDistance <= (objA->width * objA->width);
-	}
-
-	else if (objB->colliderType == 2 && objA->colliderType == 0)
-	{
-		double squaredDistance;
-		auto check = [&](
-			const double pn,
-			const double bmin,
-			const double bmax) -> double
-		{
-			double out = 0;
-			double v = pn;
-
-			if (v < bmin)
-			{
-				double val = (bmin - v);
-				out += val * val;
-			}
-
-			if (v > bmax)
-			{
-				double val = (v - bmax);
-				out += val * val;
-			}
-
-			return out;
-		};
-
-		// Squared distance
-		double sq = 0.0;
-
-		sq += check(objB->position[0], objA->point1[0], objA->point8[0]);
-		sq += check(objB->position[1], objA->point1[1], objA->point8[1]);
-		sq += check(objB->position[2], objA->point1[2], objA->point8[2]);
-
-		squaredDistance = sq;
-		if (squaredDistance <= (objB->width * objB->width) == true)
-		{ 
-		
-			objA->velocity[0] *= -1; objA->velocity[1] *= -1; objA->velocity[2] *= -1;
-
-			objB->velocity[0] *= -1; objB->velocity[1] *= -1; objB->velocity[2] *= -1;
-		}
-		return squaredDistance <= (objB->width * objB->width);
-	}
-
-	else
-		return false;
-}
-
-void MainGame::createObject(ObjParams* objParams/*char* fileName, float x, float y, float z, float width,
-							float height, float depth, float mass, bool hasGravity, int colliderType*/)
-{
-	Object* obj = new Object();
-	
-	ObjLoader* model = new ObjLoader();
-	model->load(objParams->fileName);
-	obj->setModel(model);
-
-	ObjPhysics* physics = new ObjPhysics(objParams->x, objParams->y, objParams->z, objParams->width, objParams->height,
-										 objParams->depth, objParams->mass, objParams->xVelo, objParams->yVelo, objParams->zVelo, objParams->hasGravity, objParams->colliderType);
-	obj->setPhysics(physics);
-
-	mtx.lock();
-	obj->setIndex(mapIndex);
-	objMap.insert(pair<int, Object*>(mapIndex, obj));
-	mapIndex++;
-	mtx.unlock();
-}
-
-
-void MainGame::cleanObject()
-{
-	map<int, Object*>::iterator itr = objMap.begin();
-	while (itr != objMap.end())
-	{
-		delete (itr->second->model);
-		delete (itr->second->physics);
-		delete (itr->second);
-		itr = objMap.erase(itr);
-	}
+	MainGame maingame;
+	maingame.run();
+	return 0;
 }
