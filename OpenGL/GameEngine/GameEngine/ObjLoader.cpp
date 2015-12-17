@@ -4,8 +4,8 @@
 #include <string>
 #include <fstream>
 #include "Errors.h"
-#include <SDL2/SDL.h>
-#include <GL/glew.h>
+#include <SDL.h>
+#include <glew.h>
 using namespace std;
 ObjLoader::ObjLoader()
 {
@@ -152,5 +152,4 @@ void ObjLoader::Draw()
 	glDrawArrays(GL_TRIANGLES, 0, _totalConnectedTriangles);
 	glDisableClientState(GL_VERTEX_ARRAY);
 	glDisableClientState(GL_NORMAL_ARRAY);
-
 }

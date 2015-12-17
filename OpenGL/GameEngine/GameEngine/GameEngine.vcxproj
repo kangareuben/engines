@@ -27,21 +27,25 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v110</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
+    <CLRSupport>false</CLRSupport>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v110</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
+    <CLRSupport>false</CLRSupport>
   </PropertyGroup>
   <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v110</PlatformToolset>
+    <CLRSupport>false</CLRSupport>
   </PropertyGroup>
   <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v110</PlatformToolset>
+    <CLRSupport>false</CLRSupport>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -54,32 +58,33 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(SolutionDir)\GL\include;$(SolutionDir)\SDL\include;$(SolutionDir)\SOIL\include;D:\boost_1_59_0;$(IncludePath)</IncludePath>
-    <LibraryPath>D:\boost_1_59_0\libs;D:\boost\boost_1_59_0\libs\thread;$(SolutionDir)\SDL\lib;$(SolutionDir)\GL\lib;$(SolutionDir)\SOIL\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)\GL\include;$(SolutionDir)\SDL\include;$(SolutionDir)\SOIL\include;D:\boost_1_59_0;$(SolutionDir)\GameEngine\SDL2_net-2.0.0\include;C:\Program Files %28x86%29\OpenAL 1.1 SDK\include;$(IncludePath)</IncludePath>
+    <LibraryPath>D:\boost_1_59_0\libs;D:\boost\boost_1_59_0\libs\thread;$(SolutionDir)\SDL\lib;$(SolutionDir)\GL\lib;$(SolutionDir)\SOIL\lib;$(SolutionDir)\GameEngine\SDL2_net-2.0.0\lib\x64;C:\Program Files %28x86%29\OpenAL 1.1 SDK\libs\Win64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(SolutionDir)\GL\include;$(SolutionDir)\SDL\include;$(SolutionDir)\SOIL\include;D:\boost_1_59_0;$(IncludePath)</IncludePath>
-    <LibraryPath>D:\boost_1_59_0\libs;D:\boost\boost_1_59_0\libs\thread;$(SolutionDir)\SDL\lib;$(SolutionDir)\GL\lib;$(SolutionDir)\SOIL\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)\GL\include;$(SolutionDir)\SDL\include;$(SolutionDir)\SOIL\include;D:\boost_1_59_0;$(SolutionDir)\GameEngine\SDL2_net-2.0.0\include;C:\Program Files %28x86%29\OpenAL 1.1 SDK\include;$(IncludePath)</IncludePath>
+    <LibraryPath>D:\boost_1_59_0\libs;D:\boost\boost_1_59_0\libs\thread;$(SolutionDir)\SDL\lib;$(SolutionDir)\GL\lib;$(SolutionDir)\SOIL\lib;$(SolutionDir)\GameEngine\SDL2_net-2.0.0\lib\x64;C:\Program Files %28x86%29\OpenAL 1.1 SDK\libs\Win64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(SolutionDir)\GL\include;$(SolutionDir)\SDL\include;$(SolutionDir)\SOIL\include;D:\boost_1_59_0;$(IncludePath)</IncludePath>
-    <LibraryPath>D:\boost_1_59_0\libs;D:\boost\boost_1_59_0\libs\thread;$(SolutionDir)\SDL\lib;$(SolutionDir)\GL\lib;$(SolutionDir)\SOIL\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)\GL\include;$(SolutionDir)\SDL\include;$(SolutionDir)\SOIL\include;D:\boost_1_59_0;$(SolutionDir)\GameEngine\SDL2_net-2.0.0\include;C:\Program Files %28x86%29\OpenAL 1.1 SDK\include;$(IncludePath)</IncludePath>
+    <LibraryPath>D:\boost_1_59_0\libs;D:\boost\boost_1_59_0\libs\thread;$(SolutionDir)\SDL\lib;$(SolutionDir)\GL\lib;$(SolutionDir)\SOIL\lib;$(SolutionDir)\GameEngine\SDL2_net-2.0.0\lib\x64;C:\Program Files %28x86%29\OpenAL 1.1 SDK\libs\Win64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(SolutionDir)\GL\include;$(SolutionDir)\SDL\include;$(SolutionDir)\SOIL\include;D:\boost_1_59_0;$(IncludePath)</IncludePath>
-    <LibraryPath>D:\boost_1_59_0\libs;D:\boost\boost_1_59_0\libs\thread;$(SolutionDir)\SDL\lib;$(SolutionDir)\GL\lib;$(SolutionDir)\SOIL\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)\GL\include;$(SolutionDir)\SDL\include;$(SolutionDir)\SOIL\include;D:\boost_1_59_0;$(SolutionDir)\GameEngine\SDL2_net-2.0.0\include;C:\Program Files %28x86%29\OpenAL 1.1 SDK\include;$(IncludePath)</IncludePath>
+    <LibraryPath>D:\boost_1_59_0\libs;D:\boost\boost_1_59_0\libs\thread;$(SolutionDir)\SDL\lib;$(SolutionDir)\GL\lib;$(SolutionDir)\SOIL\lib;$(SolutionDir)\GameEngine\SDL2_net-2.0.0\lib\x64;C:\Program Files %28x86%29\OpenAL 1.1 SDK\libs\Win64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>C:\Program Files %28x86%29\boost_1_59_0;C:\Users\chengchengyang\Documents\Visual Studio 2015\Projects\engines\OpenGL\GameEngine\SDL\include;C:\Users\chengchengyang\Documents\Visual Studio 2015\Projects\engines\OpenGL\GameEngine\SOIL\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2test.lib;glew32s.lib;glew32.lib;opengl32.lib;SOIL.lib;glu32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2test.lib;glew32s.lib;glew32.lib;opengl32.lib;SOIL.lib;glu32.lib;SDL2_net.lib;OpenAL32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
-      <AdditionalLibraryDirectories>$(SolutionDir)SOIL\lib;$(SolutionDir)GL\lib;$(SolutionDir)SDL\lib;D:\boost_1_59_0\stage\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)SOIL\lib;$(SolutionDir)GL\lib;$(SolutionDir)SDL\lib;C:\Program Files %28x86%29\boost_1_59_0\stage\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -89,42 +94,89 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>C:\Program Files %28x86%29\boost_1_59_0;C:\Users\chengchengyang\Documents\Visual Studio 2015\Projects\engines\OpenGL\GameEngine\SDL\include;C:\Users\chengchengyang\Documents\Visual Studio 2015\Projects\engines\OpenGL\GameEngine\SOIL\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2test.lib;glew32s.lib;glew32.lib;opengl32.lib;SOIL.lib;glu32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2test.lib;glew32s.lib;glew32.lib;opengl32.lib;SOIL.lib;glu32.lib;SDL2_net.lib;OpenAL32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
-      <AdditionalLibraryDirectories>$(SolutionDir)SOIL\lib;$(SolutionDir)GL\lib;$(SolutionDir)SDL\lib;D:\boost_1_59_0\stage\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)SOIL\lib;$(SolutionDir)GL\lib;$(SolutionDir)SDL\lib;C:\Program Files %28x86%29\boost_1_59_0\stage\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Link>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2test.lib;glew32s.lib;glew32.lib;opengl32.lib;SOIL.lib;glu32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)SOIL\lib;$(SolutionDir)GL\lib;$(SolutionDir)SDL\lib;D:\boost_1_59_0\stage\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2test.lib;glew32s.lib;glew32.lib;opengl32.lib;SOIL.lib;glu32.lib;SDL2_net.lib;OpenAL32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)SOIL\lib;$(SolutionDir)GL\lib;$(SolutionDir)SDL\lib;C:\Program Files %28x86%29\boost_1_59_0\stage\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateMapFile>true</GenerateMapFile>
     </Link>
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\Program Files %28x86%29\boost_1_59_0;C:\Users\chengchengyang\Documents\Visual Studio 2015\Projects\engines\OpenGL\GameEngine\SDL\include;C:\Users\chengchengyang\Documents\Visual Studio 2015\Projects\engines\OpenGL\GameEngine\SOIL\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Link>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2test.lib;glew32s.lib;glew32.lib;opengl32.lib;SOIL.lib;glu32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)SOIL\lib;$(SolutionDir)GL\lib;$(SolutionDir)SDL\lib;D:\boost_1_59_0\stage\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2test.lib;glew32s.lib;glew32.lib;opengl32.lib;SOIL.lib;glu32.lib;SDL2_net.lib;OpenAL32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)SOIL\lib;$(SolutionDir)GL\lib;$(SolutionDir)SDL\lib;C:\Program Files %28x86%29\boost_1_59_0\stage\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\Program Files %28x86%29\boost_1_59_0;C:\Users\chengchengyang\Documents\Visual Studio 2015\Projects\engines\OpenGL\GameEngine\SDL\include;C:\Users\chengchengyang\Documents\Visual Studio 2015\Projects\engines\OpenGL\GameEngine\SOIL\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="aabb.cpp" />
+    <ClCompile Include="aldlist.cpp" />
+    <ClCompile Include="ALFramework.cpp" />
+    <ClCompile Include="AudioManager.cpp" />
+    <ClCompile Include="boundingSphere.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="collider.cpp" />
+    <ClCompile Include="CWaves.cpp" />
     <ClCompile Include="Errors.cpp" />
+    <ClCompile Include="intersectData.cpp" />
+    <ClCompile Include="LoadOAL.cpp" />
+    <ClCompile Include="main.cpp" />
     <ClCompile Include="MainGame.cpp" />
+    <ClCompile Include="math3d.cpp" />
+    <ClCompile Include="Network.cpp" />
+    <ClCompile Include="ObjAI.cpp" />
+    <ClCompile Include="Object.cpp" />
     <ClCompile Include="ObjLoader.cpp" />
+    <ClCompile Include="ObjPhysics.cpp" />
+    <ClCompile Include="physicsEngine.cpp" />
+    <ClCompile Include="physicsObject.cpp" />
+    <ClCompile Include="plane.cpp" />
+    <ClCompile Include="referenceCounter.cpp" />
     <ClCompile Include="Source.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="aabb.h" />
+    <ClInclude Include="aldlist.h" />
+    <ClInclude Include="ALFramework.h" />
+    <ClInclude Include="AudioManager.h" />
+    <ClInclude Include="boundingSphere.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="collider.h" />
+    <ClInclude Include="CWaves.h" />
     <ClInclude Include="Errors.h" />
+    <ClInclude Include="intersectData.h" />
+    <ClInclude Include="LoadOAL.h" />
     <ClInclude Include="MainGame.h" />
+    <ClInclude Include="math3d.h" />
+    <ClInclude Include="Network.h" />
+    <ClInclude Include="ObjAI.h" />
+    <ClInclude Include="Object.h" />
     <ClInclude Include="ObjLoader.h" />
+    <ClInclude Include="ObjPhysics.h" />
+    <ClInclude Include="physicsEngine.h" />
+    <ClInclude Include="physicsObject.h" />
+    <ClInclude Include="plane.h" />
+    <ClInclude Include="referenceCounter.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

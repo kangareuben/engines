@@ -44,6 +44,8 @@ void Network ::Send(Camera *p)
 }
 
 
+
+
 /*void Network ::Recieve(Camera *p)
 {
     while(SDLNet_CheckSockets(socket,0)>0 &&

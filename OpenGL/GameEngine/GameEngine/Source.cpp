@@ -1,3 +1,4 @@
+/*
 #include "MainGame.h"
 #include "iostream"
 #include <boost/thread/thread.hpp>
@@ -11,8 +12,8 @@ boost::thread thrd3(&fn3);
 thrd1.join();
 thrd2.join();
 thrd3.join();
-*/
 mainGame.run();
 
 return 0;
 }
+*/

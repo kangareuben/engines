@@ -5,10 +5,12 @@
 Camera::Camera()
 {
     id=-1;
-	camX = 0.0f;
-	camY = 0.0f;
-	camZ = 0.0f;
-	bool mouseIn = true;
+	camX = 25.0f;
+	camY = 75.0f;
+	camZ = 25.0f;
+	camPitch = -90;
+	
+	mouseIn = false;//true;
 }
 
 void Camera :: setId(int i)

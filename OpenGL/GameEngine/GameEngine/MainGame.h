@@ -1,6 +1,6 @@
 #pragma once
 #include <SDL.h>
-#include <GL/glew.h>
+#include <glew.h>
 #include "ObjLoader.h"
 #include "Camera.h"
 //#include "MainGame.h"
@@ -49,5 +49,4 @@ private:
 	float _maxFPS;
 	float _moveVel;
 	float _mouseVel;
-	GLfloat* ambient1;
 };

@@ -13,4 +13,5 @@ public:
 	float *ptr_vertexBuffer;
 	long _totalConnectedPoints;
 	long _totalConnectedTriangles;
+	//int physicIndex;
 };

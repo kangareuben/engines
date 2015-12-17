@@ -2,7 +2,7 @@
 #define NETWORK_H
 #include "Camera.h"
 #include <cstring>
-#include <SDL/SDL_net.h>
+#include <SDL_net.h>
 class Network
 {
     public:
@@ -14,6 +14,7 @@ class Network
         ~Network();
         void Send(Camera *cam);
         void Recieve(Camera *p);
+		void SendText(string *str);
 
     protected:
     private:

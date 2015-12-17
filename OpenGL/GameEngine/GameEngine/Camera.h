@@ -1,8 +1,8 @@
 #pragma once
 #include <math.h>
 #include <iostream>
-#include <SDL2/SDL.h>
-#include <GL/glew.h>
+#include <SDL.h>
+#include <glew.h>
 using namespace std;
 class Camera
 {
@@ -22,5 +22,5 @@ public:
 	float camX, camY, camZ,camYaw,camPitch;
 	bool mouseIn;
 	void updateCamera();
-	float PI = 3.1415926535;
+	//float PI = 3.1415926535;
 };

@@ -30,6 +30,7 @@ MainGame::MainGame()
 	_mouseVel = 0.5f;
 	_moveVel = 0.5f;
 	isOnline = true;
+	mouseIn = false;
 
 	if(isOnline)
 	{
@@ -97,11 +98,7 @@ void MainGame::initSystems()
 	glEnable(GL_LIGHT0);
 
 	//Lighting test
-	ambient1 = new GLfloat[4];
-	ambient1[0] = 0.2;
-	ambient1[1] = 0.5;
-	ambient1[2] = 0.3;
-	ambient1[3] = 1.0;
+	GLfloat ambient1[] = { 0.2, 0.5, 0.3, 1.0 };
 	glLightfv(GL_LIGHT1, GL_AMBIENT, ambient1);
 	GLfloat diffuse1[] = { 0.1, 0.1, 0.1, 1.0 };
 	glLightfv(GL_LIGHT1, GL_DIFFUSE, diffuse1);
@@ -145,48 +142,7 @@ void MainGame::run()
  //   BoundingSphere sphere2(Vector3f(0.0f,3.0f,0.0f),1.0f);
 //	BoundingSphere sphere3(Vector3f(0.0f,0.0f,2.0f),1.0f);
 //	BoundingSphere sphere4(Vector3f(1.0f,0.0f,0.0f),1.0f);
-/*
-	IntersectData sphereIntersectSphere2 = sphere1.IntersectBoundingSphere(sphere2);
-    IntersectData sphereIntersectSphere3 = sphere1.IntersectBoundingSphere(sphere3);
-	IntersectData sphereIntersectSphere4 = sphere1.IntersectBoundingSphere(sphere4);
 
-	cout<<"Sphere 1 intersects sphere2: "<< sphereIntersectSphere2.GetDoesIntersect()<<sphereIntersectSphere2.GetDistance()<<endl;
-    cout<<"Sphere 1 intersects sphere3: "<< sphereIntersectSphere3.GetDoesIntersect()<<sphereIntersectSphere3.GetDistance()<<endl;
-	cout<<"Sphere 1 intersects sphere4: "<< sphereIntersectSphere4.GetDoesIntersect()<<sphereIntersectSphere4.GetDistance()<<endl;
-
-
-/*
-    AABB aabb1(Vector3d(0.0,0.0,0.0),Vector3d(1.0,1.0,1.0));
-    AABB aabb2(Vector3d(1.0,1.0,1.0),Vector3d(2.0,2.0,2.0));
-    AABB aabb3(Vector3d(1.0,0.0,0.0),Vector3d(2.0,1.0,1.0));
-    AABB aabb4(Vector3d(0.0,0.0,-2.0),Vector3d(1.0,1.0,-1.0));
-    AABB aabb5(Vector3d(0.0,0.5,0.0),Vector3d(1.0,1.5,1.0));
-
-    IntersectData aabb1Intersectaabb2 = aabb1.IntersectAABB(aabb2);
-    IntersectData aabb1Intersectaabb3 = aabb1.IntersectAABB(aabb3);
-    IntersectData aabb1Intersectaabb4 = aabb1.IntersectAABB(aabb4);
-    IntersectData aabb1Intersectaabb5 = aabb1.IntersectAABB(aabb5);
-
-
-    cout<<"AABB1 intersect AABB2 : "<<aabb1Intersectaabb2.GetDoesIntersect()<<"Distance:"<<aabb1Intersectaabb2.GetDistance()<<endl;
-    cout<<"AABB1 intersect AABB3 : "<<aabb1Intersectaabb3.GetDoesIntersect()<<"Distance:"<<aabb1Intersectaabb3.GetDistance()<<endl;
-    cout<<"AABB1 intersect AABB4 : "<<aabb1Intersectaabb4.GetDoesIntersect()<<"Distance:"<<aabb1Intersectaabb4.GetDistance()<<endl;
-    cout<<"AABB1 intersect AABB5 : "<<aabb1Intersectaabb5.GetDoesIntersect()<<"Distance:"<<aabb1Intersectaabb5.GetDistance()<<endl;
-
-*/
-  /*  Plane plane1(Vector3d(0.0,1.0,0.0),0.0);
-
-    IntersectData plane1IntersectSphere1 = plane1.IntersectSphere(sphere1);
-    IntersectData plane1IntersectSphere2 = plane1.IntersectSphere(sphere2);
-    IntersectData plane1IntersectSphere3 = plane1.IntersectSphere(sphere3);
-    IntersectData plane1IntersectSphere4 = plane1.IntersectSphere(sphere4);
-
-    cout<<"Plane1 intersect Sphere1:" <<plane1IntersectSphere1.GetDoesIntersect()<<"Distance"<<plane1IntersectSphere1.GetDistance()<<endl;
-    cout<<"Plane1 intersect Sphere2:" <<plane1IntersectSphere2.GetDoesIntersect()<<"Distance"<<plane1IntersectSphere2.GetDistance()<<endl;
-    cout<<"Plane1 intersect Sphere3:" <<plane1IntersectSphere3.GetDoesIntersect()<<"Distance"<<plane1IntersectSphere3.GetDistance()<<endl;
-    cout<<"Plane1 intersect Sphere4:" <<plane1IntersectSphere4.GetDoesIntersect()<<"Distance"<<plane1IntersectSphere4.GetDistance()<<endl;
-
-*/
 	//Terrain
 	//physicsEngine.AddObject(PhysicsObject(new BoundingSphere(Vector3f(0, 0, 0), 0), Vector3f(0, 0, 0)));
 	//start
@@ -194,7 +150,12 @@ void MainGame::run()
 	//end
 	physicsEngine.AddObject(PhysicsObject(new BoundingSphere(Vector3f(95, 1, 95),1),Vector3f(0,0,0)));
    
-	objAI.PathFinding((int)9, (int)9);
+	//objAI.PathFinding((int)9, (int)9);
+	
+	while(!objAI.AstarPathFinding(std::pair<int, int>(0, 0), std::pair<int, int>(9, 9)))
+	{
+		objAI.AstarInitialize();
+	}
 	gameLoop();
 }
 
@@ -205,32 +166,56 @@ void MainGame::gameLoop()
 	{
 		float _startTicks = SDL_GetTicks();
 		processInput();
-		//AI change speed
-		if (objAI.m_nStep <= objAI.m_nPointer)
+		if(objAI.m_AstarPath.size())
 		{
-			int delx = objAI.m_delta[objAI.m_Path[objAI.m_nStep]][0];
-			int delz = objAI.m_delta[objAI.m_Path[objAI.m_nStep]][1];
-			physicsEngine.GetObject(0).GetVelocity().SetX(delx*10);
-			physicsEngine.GetObject(0).GetVelocity().SetZ(delz*10);
+			//AI change speed
+			std::list<std::pair<int, int>>::iterator itrCurrent;
+			std::list<std::pair<int, int>>::iterator itrNext;
+			itrCurrent = objAI.m_itrStep;
+			itrNext = objAI.m_itrStep;
+			itrNext++;
+			if (itrNext != objAI.m_AstarPath.end())//objAI.m_nStep <= objAI.m_nPointer)
+			{
+				cout << itrCurrent->first << itrCurrent->second<< endl;
+				cout << itrNext->first << itrNext->second << endl;
+				int delx = itrNext->first - itrCurrent->first;
+				int delz = itrNext->second - itrCurrent->second;
+				cout << delx << " " << delz << endl;
+				physicsEngine.GetObject(0).GetVelocity().SetX(delx*5);
+				physicsEngine.GetObject(0).GetVelocity().SetZ(delz*5);
 
-			int x = physicsEngine.GetObject(0).GetPosition().GetX();
-			int y = physicsEngine.GetObject(0).GetPosition().GetY();
-			int z = physicsEngine.GetObject(0).GetPosition().GetZ();
-
-			if(x>(objAI.m_nCurrentPosX+delx)*UNIT_LENGTH && x<(objAI.m_nCurrentPosX + delx+1)*UNIT_LENGTH)
-				if (z>(objAI.m_nCurrentPosZ + delz)*UNIT_LENGTH && z < (objAI.m_nCurrentPosZ + delz + 1)*UNIT_LENGTH)
+				float x = physicsEngine.GetObject(0).GetPosition().GetX();
+				float y = physicsEngine.GetObject(0).GetPosition().GetY();
+				float z = physicsEngine.GetObject(0).GetPosition().GetZ();
+				cout << x << " " << z << endl;
+				cout << objAI.m_nCurrentPosX << " " << objAI.m_nCurrentPosZ << endl;
+				if(x>(objAI.m_nCurrentPosX+delx)*UNIT_LENGTH && x<(objAI.m_nCurrentPosX + delx+1)*UNIT_LENGTH)
+					if (z>(objAI.m_nCurrentPosZ + delz)*UNIT_LENGTH && z < (objAI.m_nCurrentPosZ + delz + 1)*UNIT_LENGTH)
+					{
+						physicsEngine.GetObject(0).GetPosition().SetX((objAI.m_nCurrentPosX+delx)*UNIT_LENGTH+5);
+						physicsEngine.GetObject(0).GetPosition().SetZ((objAI.m_nCurrentPosZ+delz)*UNIT_LENGTH+5);
+						objAI.m_nCurrentPosX += delx;
+						objAI.m_nCurrentPosZ += delz;
+						objAI.m_itrStep++;
+						cout<<objAI.m_itrStep->first<<" "<<objAI.m_itrStep->second<<endl;
+					}
+				itrCurrent = objAI.m_itrStep;
+				itrNext = objAI.m_itrStep;
+				itrNext++;
+			}
+			else
+			{
+				physicsEngine.GetObject(0).GetVelocity().SetX(0);
+				physicsEngine.GetObject(0).GetVelocity().SetZ(0);
+				physicsEngine.GetObject(0).GetPosition().SetX(5);
+				physicsEngine.GetObject(0).GetPosition().SetZ(5);
+				objAI.AstarInitialize();
+				while(!objAI.AstarPathFinding(std::pair<int, int>(0, 0), std::pair<int, int>(9, 9)))
 				{
-					objAI.m_nCurrentPosX += delx;
-					objAI.m_nCurrentPosZ += delz;
-					objAI.m_nStep++;
+					objAI.AstarInitialize();
 				}
+			}
 		}
-		else
-		{
-			physicsEngine.GetObject(0).GetVelocity().SetX(0);
-			physicsEngine.GetObject(0).GetVelocity().SetZ(0);
-		}
-
 		draw();
 
 		if(isOnline)
@@ -254,17 +239,6 @@ void MainGame::gameLoop()
 		{
 			SDL_Delay(1000.0f / _maxFPS - _frameTicks);
 		}
-
-		for (int i = 0; i < 3; i++)
-		{
-			//ambient1[i] += (((float)rand()) / RAND_MAX * 2 - 1) / 5;
-			ambient1[i] += ((float)rand()) / RAND_MAX * .02;
-			if (ambient1[i] >= 1.0)
-			{
-				ambient1[i] = 0.0;
-			}
-		}
-		glLightfv(GL_LIGHT1, GL_AMBIENT, ambient1);
 	}
 
 	//Clean up OpenAL
@@ -273,9 +247,6 @@ void MainGame::gameLoop()
 	ALFWShutdownOpenAL();
 	ALFWShutdown();
 	delete audioManager;
-
-	//Clean up lighting
-	delete[] ambient1;
 }
 
 
@@ -318,6 +289,8 @@ void MainGame::processInput()
 			mouseIn = true;
 			SDL_ShowCursor(SDL_DISABLE);
 			break;
+
+
 
 		case SDL_KEYDOWN:
 			switch (evnt.key.keysym.sym)
@@ -382,7 +355,7 @@ void MainGame::draw()
 	glLoadIdentity();
 	mainCam.control(_moveVel, _mouseVel, mouseIn, ptr_window);
 	mainCam.updateCamera();
-	gluLookAt(0, 1, 25, 0, 0, 0, 0, 1, 0);
+	gluLookAt(-50, 25, 0, -50, 0, 0, 1, 0, 0);
 	glTranslatef(mainCam.camX*-1, mainCam.camY*-1, mainCam.camZ*-1);
 
 	//Draw a grid

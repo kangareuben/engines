@@ -24,6 +24,6 @@ void Object::setIndex(int nIndex)
 }
 void Object::Draw(ObjPhysics* pPhysics)
 {
-	model->Draw(pPhysics, objIndex);
+//	model->Draw(pPhysics, objIndex);
 }
 
