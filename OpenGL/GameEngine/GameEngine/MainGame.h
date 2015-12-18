@@ -16,6 +16,7 @@ public:
 	Network *net;
 	bool isOnline;
 	void initSystems();
+	void loadObjects();
 	void gameLoop();
 	void draw();
 	void run();
@@ -41,6 +42,7 @@ public:
 	int _windowHeight;
 	int _windowWidth;
 	void calculateFPS();
+	void toggleLight(int);
 	AudioManager* audioManager;
 
 private:
@@ -52,7 +54,44 @@ private:
 	float _moveVel;
 	float _mouseVel;
 	GLfloat* ambient1;
-	bool show_test_window;
-	bool show_another_window;
-	float lightR, lightG, lightB;
+	bool sceneLoaded = false;
+
+#pragma region Lighting UI Variables
+	float lightR1 = 1.0f;
+	float lightR2 = 1.0f;
+	float lightR3 = 1.0f;
+	float lightR4 = 1.0f;
+	float lightR5 = 1.0f;
+	float lightR6 = 1.0f;
+	float lightR7 = 1.0f;
+	float lightG1 = 1.0f;
+	float lightG2 = 1.0f;
+	float lightG3 = 1.0f;
+	float lightG4 = 1.0f;
+	float lightG5 = 1.0f;
+	float lightG6 = 1.0f;
+	float lightG7 = 1.0f;
+	float lightB1 = 1.0f;
+	float lightB2 = 1.0f;
+	float lightB3 = 1.0f;
+	float lightB4 = 1.0f;
+	float lightB5 = 1.0f;
+	float lightB6 = 1.0f;
+	float lightB7 = 1.0f;
+	bool lightOn1 = true;
+	bool lightOn2 = false;
+	bool lightOn3 = false;
+	bool lightOn4 = false;
+	bool lightOn5 = false;
+	bool lightOn6 = false;
+	bool lightOn7 = false;
+	bool prevLightOn1 = true;
+	bool prevLightOn2 = false;
+	bool prevLightOn3 = false;
+	bool prevLightOn4 = false;
+	bool prevLightOn5 = false;
+	bool prevLightOn6 = false;
+	bool prevLightOn7 = false;
+	int curLight = 1;
+#pragma endregion
 };

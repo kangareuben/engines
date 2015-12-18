@@ -109,8 +109,6 @@ void AudioManager::IncrementCurSource()
 	{
 		curSource = 0;
 	}
-
-	cout << curSource << endl;
 }
 
 void AudioManager::Cleanup()

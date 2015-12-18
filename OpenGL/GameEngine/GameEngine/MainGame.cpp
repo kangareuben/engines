@@ -131,9 +131,9 @@ void MainGame::initSystems()
 	ambient1[2] = 0.3;
 	ambient1[3] = 1.0;*/
 
-	ambient1[0] = 0.0;
-	ambient1[1] = 0.0;
-	ambient1[2] = 0.0;
+	ambient1[0] = 1.0;
+	ambient1[1] = 1.0;
+	ambient1[2] = 1.0;
 	ambient1[3] = 1.0;
 
 	glLightfv(GL_LIGHT1, GL_AMBIENT, ambient1);
@@ -187,21 +187,16 @@ void MainGame::initSystems()
 	glRotatef(-180, 0, 0, 1);
 
 	ImGui_ImplSdl_Init(ptr_window);
-	show_test_window = false;
-	show_another_window = false;
 }
 
-void MainGame::run()
+void MainGame::loadObjects()
 {
-	initSystems();
-	//_obn1 = obj.load("Models/sphere.obj");
-	//_obn2 = obj2.load("Models/sphere.obj");
-
 	for (int i = 0; i<numBalls; i++)
 	{
 		_obn[i] = objList[i].load("Models/sphere.obj");
 		//_obn[i] = objList[i].load("Models/capsule.obj");
 	}
+
 	srand(time(NULL));
 	float posRandX;
 	float posRandY;
@@ -227,6 +222,13 @@ void MainGame::run()
 		posRandY += 1.5;
 		//cout<<"X:"<<posRandX<<endl;
 	}
+}
+
+void MainGame::run()
+{
+	initSystems();
+	//_obn1 = obj.load("Models/sphere.obj");
+	//_obn2 = obj2.load("Models/sphere.obj");
 
 	gameLoop();
 }
@@ -244,21 +246,24 @@ void MainGame::gameLoop()
 	//		net->Send(&mainCam);
 	//	}
 
-		double newTime = SDL_GetTicks();
-		double frameTime = newTime - currentTime;
-		if (frameTime > 0.25)
-			frameTime = 0.25;
-		currentTime = newTime;
-
-		accumulator += frameTime;
-
-		while (accumulator >= dt)
+		if (sceneLoaded)
 		{
-			for (int i = 0; i<numBalls; i++)
+			double newTime = SDL_GetTicks();
+			double frameTime = newTime - currentTime;
+			if (frameTime > 0.25)
+				frameTime = 0.25;
+			currentTime = newTime;
+
+			accumulator += frameTime;
+
+			while (accumulator >= dt)
 			{
-				ob[i].integrate(t, dt);
-				t += dt;
-				accumulator -= dt;
+				for (int i = 0; i < numBalls; i++)
+				{
+					ob[i].integrate(t, dt);
+					t += dt;
+					accumulator -= dt;
+				}
 			}
 		}
 
@@ -272,10 +277,51 @@ void MainGame::gameLoop()
 				ambient1[i] = 0.0;
 			}
 		}*/
-		ambient1[0] = lightR;
-		ambient1[1] = lightG;
-		ambient1[2] = lightB;
-		glLightfv(GL_LIGHT1, GL_AMBIENT, ambient1);
+		switch (curLight)
+		{
+		case 1:
+			ambient1[0] = lightR1;
+			ambient1[1] = lightG1;
+			ambient1[2] = lightB1;
+			glLightfv(GL_LIGHT1, GL_AMBIENT, ambient1);
+			break;
+		case 2:
+			ambient1[0] = lightR2;
+			ambient1[1] = lightG2;
+			ambient1[2] = lightB2;
+			glLightfv(GL_LIGHT2, GL_AMBIENT, ambient1);
+			break;
+		case 3:
+			ambient1[0] = lightR3;
+			ambient1[1] = lightG3;
+			ambient1[2] = lightB3;
+			glLightfv(GL_LIGHT3, GL_AMBIENT, ambient1);
+			break;
+		case 4:
+			ambient1[0] = lightR4;
+			ambient1[1] = lightG4;
+			ambient1[2] = lightB4;
+			glLightfv(GL_LIGHT4, GL_AMBIENT, ambient1);
+			break;
+		case 5:
+			ambient1[0] = lightR5;
+			ambient1[1] = lightG5;
+			ambient1[2] = lightB5;
+			glLightfv(GL_LIGHT5, GL_AMBIENT, ambient1);
+			break;
+		case 6:
+			ambient1[0] = lightR6;
+			ambient1[1] = lightG6;
+			ambient1[2] = lightB6;
+			glLightfv(GL_LIGHT6, GL_AMBIENT, ambient1);
+			break;
+		case 7:
+			ambient1[0] = lightR7;
+			ambient1[1] = lightG7;
+			ambient1[2] = lightB7;
+			glLightfv(GL_LIGHT7, GL_AMBIENT, ambient1);
+			break;
+		}
 	}
 
 	//Clean up OpenAL
@@ -376,91 +422,14 @@ void MainGame::processInput()
 				break;
 
 			//Press q to play a sound
-			case SDLK_q:
+			/*case SDLK_q:
 			{
 				ALfloat position[3] = { 0, 0, 0 };
 				ALfloat velocity[3] = { 0, 0, 0 };
 				ALfloat orientation[6] = { 1, 0, 0, 0, 1, 0 };
 				audioManager->Play("thud.wav", position, velocity, orientation);
 				break;
-			}
-
-			case SDLK_1:
-				if (glIsEnabled(GL_LIGHT1))
-				{
-					glDisable(GL_LIGHT1);
-				}
-				else
-				{
-					glEnable(GL_LIGHT1);
-				}
-				break;
-
-			case SDLK_2:
-				if (glIsEnabled(GL_LIGHT2))
-				{
-					glDisable(GL_LIGHT2);
-				}
-				else
-				{
-					glEnable(GL_LIGHT2);
-				}
-				break;
-
-			case SDLK_3:
-				if (glIsEnabled(GL_LIGHT3))
-				{
-					glDisable(GL_LIGHT3);
-				}
-				else
-				{
-					glEnable(GL_LIGHT3);
-				}
-				break;
-
-			case SDLK_4:
-				if (glIsEnabled(GL_LIGHT4))
-				{
-					glDisable(GL_LIGHT4);
-				}
-				else
-				{
-					glEnable(GL_LIGHT4);
-				}
-				break;
-
-			case SDLK_5:
-				if (glIsEnabled(GL_LIGHT5))
-				{
-					glDisable(GL_LIGHT5);
-				}
-				else
-				{
-					glEnable(GL_LIGHT5);
-				}
-				break;
-
-			case SDLK_6:
-				if (glIsEnabled(GL_LIGHT6))
-				{
-					glDisable(GL_LIGHT6);
-				}
-				else
-				{
-					glEnable(GL_LIGHT6);
-				}
-				break;
-
-			case SDLK_7:
-				if (glIsEnabled(GL_LIGHT7))
-				{
-					glDisable(GL_LIGHT7);
-				}
-				else
-				{
-					glEnable(GL_LIGHT7);
-				}
-				break;
+			}*/
 			}
 		}
 	}
@@ -476,128 +445,278 @@ void MainGame::draw()
 	gluLookAt(50, 50, -150, 50, 50, 0, 0, 1, 0);
 	glTranslatef(mainCam.camX*-1, mainCam.camY*-1, mainCam.camZ*-1);
 
-	glBegin(GL_LINE_STRIP);
-	glColor3f(0.0, 1.0, 0.0);
-
-	glPointSize(5);
-	glLineWidth(5);
-
-	glVertex3f(0.0, 0.0, 0.0);
-	glVertex3f(100.4, 0.0, 0.0);
-	glVertex3f(100.4, 100.4, 0.0);
-	glVertex3f(0.0, 100.4, 0.0);
-	glVertex3f(0.0, 0.0, 0.0);
-	/*glVertex3f(0.0, 0.0, 100.0);
-	glVertex3f(100.0, 0.0, 100.0);
-	glVertex3f(100.0, 0.0, 0.0);
-	glVertex3f(100.0, 100.0, 0.0);
-	glVertex3f(100.0, 100.0, 100.0);
-	glVertex3f(0.0, 100.0, 100.0);
-	glVertex3f(0.0, 0.0, 0.0);*/
-	
-	glColor3f(1.0, 1.0, 1.0);
-	glEnd();
-
-	/*glBegin(GL_QUADS);
-	glVertex3f(0.0, 0.0, 2.0);
-	glVertex3f(100.4, 0.0, 2.0);
-	glVertex3f(100.4, 100.4, 2.0);
-	glVertex3f(0.0, 100.4, 2.0);
-	glVertex3f(0.0, 0.0, 2.0);
-	glEnd();*/
-
-	for (int i = 0; i<numBalls; i++)
+	if (sceneLoaded)
 	{
-		glPushMatrix();
-		glTranslatef(ob[i].getX(), ob[i].getY(), ob[i].getZ());
-		ob[i].render();
-		glCallList(_obn[i]);
-		glPopMatrix();
-	}
+		glBegin(GL_LINE_STRIP);
+		glColor3f(0.0, 1.0, 0.0);
 
-	for (int i = 0; i<numBalls; i++)
-	{
-		for (int j = i + 1; j<numBalls; j++)
+		glPointSize(5);
+		glLineWidth(5);
+
+		glVertex3f(0.0, 0.0, 0.0);
+		glVertex3f(100.4, 0.0, 0.0);
+		glVertex3f(100.4, 100.4, 0.0);
+		glVertex3f(0.0, 100.4, 0.0);
+		glVertex3f(0.0, 0.0, 0.0);
+
+		glColor3f(1.0, 1.0, 1.0);
+		glEnd();
+
+		for (int i = 0; i < numBalls; i++)
 		{
-			if (col.spheresphere(&ob[i], &ob[j]))
+			glPushMatrix();
+			glTranslatef(ob[i].getX(), ob[i].getY(), ob[i].getZ());
+			ob[i].render();
+			glCallList(_obn[i]);
+			glPopMatrix();
+		}
+
+		for (int i = 0; i < numBalls; i++)
+		{
+			for (int j = i + 1; j < numBalls; j++)
 			{
-				col.spheresphereResponse(&ob[i], &ob[j]);
-				audioManager->Play("ow.wav");
+				if (col.spheresphere(&ob[i], &ob[j]))
+				{
+					col.spheresphereResponse(&ob[i], &ob[j]);
+					audioManager->Play("ow.wav");
+				}
 			}
 		}
-	}
-	for (int i = 0; i<numBalls; i++)
-	{
-		if (col.sphereplane(&pUpper, &ob[i]))
+		for (int i = 0; i < numBalls; i++)
 		{
-			//cout << "collision upper" << endl;
-			//audioManager->Play("tick.wav");
-		}
-		else if (col.sphereplane(&pLower, &ob[i]))
-		{
-			//cout << "collision lower" << endl;
-			//audioManager->Play("tick.wav");
-		}
+			if (col.sphereplane(&pUpper, &ob[i]))
+			{
+				//cout << "collision upper" << endl;
+				//audioManager->Play("tick.wav");
+			}
+			else if (col.sphereplane(&pLower, &ob[i]))
+			{
+				//cout << "collision lower" << endl;
+				//audioManager->Play("tick.wav");
+			}
 
-		else if (col.sphereplane(&pLeft, &ob[i]))
-		{
-			//cout << "collision left" << endl;
-			//audioManager->Play("tick.wav");
-		}
+			else if (col.sphereplane(&pLeft, &ob[i]))
+			{
+				//cout << "collision left" << endl;
+				//audioManager->Play("tick.wav");
+			}
 
 
-		else if (col.sphereplane(&pRight, &ob[i]))
-		{
-			//cout << "collision right" << endl;
-			//audioManager->Play("tick.wav");
-		}
+			else if (col.sphereplane(&pRight, &ob[i]))
+			{
+				//cout << "collision right" << endl;
+				//audioManager->Play("tick.wav");
+			}
 
-		else if (col.sphereplane(&pFront, &ob[i]))
-		{
-			//cout << "collision front" << endl;
-			//audioManager->Play("tick.wav");
-		}
+			else if (col.sphereplane(&pFront, &ob[i]))
+			{
+				//cout << "collision front" << endl;
+				//audioManager->Play("tick.wav");
+			}
 
-		else if (col.sphereplane(&pBack, &ob[i]))
-		{
-			//cout << "collision back" << endl;
-			//audioManager->Play("tick.wav");
+			else if (col.sphereplane(&pBack, &ob[i]))
+			{
+				//cout << "collision back" << endl;
+				//audioManager->Play("tick.wav");
+			}
 		}
 	}
 
 	ImGui_ImplSdl_NewFrame(ptr_window);
-
+	if (!sceneLoaded)
 	{
-		ImGui::Text("hello world");
-		ImGui::SliderFloat("red", &lightR, 0.0f, 1.0f);
-		ImGui::SliderFloat("green", &lightG, 0.0f, 1.0f);
-		ImGui::SliderFloat("blue", &lightB, 0.0f, 1.0f);
-		//ImGui::ColorEdit3("clear color", (float*)&clear_color);
-		if (ImGui::Button("Test Window")) show_test_window ^= 1;
-		if (ImGui::Button("Another Window")) show_another_window ^= 1;
-		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-
-	}
-
-	if (show_another_window)
-	{
-		ImGui::SetNextWindowSize(ImVec2(200, 100), ImGuiSetCond_FirstUseEver);
-		ImGui::Begin("Another Window", &show_another_window);
-		ImGui::Text("hello");
+		ImGui::Begin("Load Scene Panel");
+		if (ImGui::Button("Load Scene"))
+		{
+			sceneLoaded = true;
+			loadObjects();
+		}
 		ImGui::End();
-
 	}
-
-	if (show_test_window)
+	if (sceneLoaded)
 	{
-		ImGui::SetNextWindowPos(ImVec2(650, 20), ImGuiSetCond_FirstUseEver);
-		ImGui::ShowTestWindow(&show_test_window);
+		ImGui::Begin("Light Control Panel");
+		{
+			ImGui::Text("Use these controls to adjust lights");
+			ImGui::InputInt("light number", &curLight);
+			if (curLight == 0)
+			{
+				curLight = 1;
+			}
+			else if (curLight == 8)
+			{
+				curLight = 7;
+			}
+			switch (curLight)
+			{
+			case 1:
+				ImGui::Checkbox("light on", &lightOn1);
+				if (lightOn1 != prevLightOn1)
+				{
+					toggleLight(1);
+					prevLightOn1 = lightOn1;
+				}
+				ImGui::SliderFloat("red", &lightR1, 0.0f, 1.0f);
+				ImGui::SliderFloat("green", &lightG1, 0.0f, 1.0f);
+				ImGui::SliderFloat("blue", &lightB1, 0.0f, 1.0f);
+				break;
+			case 2:
+				ImGui::Checkbox("light on", &lightOn2);
+				if (lightOn2 != prevLightOn2)
+				{
+					toggleLight(2);
+					prevLightOn2 = lightOn2;
+				}
+				ImGui::SliderFloat("red", &lightR2, 0.0f, 1.0f);
+				ImGui::SliderFloat("green", &lightG2, 0.0f, 1.0f);
+				ImGui::SliderFloat("blue", &lightB2, 0.0f, 1.0f);
+				break;
+			case 3:
+				ImGui::Checkbox("light on", &lightOn3);
+				if (lightOn3 != prevLightOn3)
+				{
+					toggleLight(3);
+					prevLightOn3 = lightOn3;
+				}
+				ImGui::SliderFloat("red", &lightR3, 0.0f, 1.0f);
+				ImGui::SliderFloat("green", &lightG3, 0.0f, 1.0f);
+				ImGui::SliderFloat("blue", &lightB3, 0.0f, 1.0f);
+				break;
+			case 4:
+				ImGui::Checkbox("light on", &lightOn4);
+				if (lightOn4 != prevLightOn4)
+				{
+					toggleLight(4);
+					prevLightOn4 = lightOn4;
+				}
+				ImGui::SliderFloat("red", &lightR4, 0.0f, 1.0f);
+				ImGui::SliderFloat("green", &lightG4, 0.0f, 1.0f);
+				ImGui::SliderFloat("blue", &lightB4, 0.0f, 1.0f);
+				break;
+			case 5:
+				ImGui::Checkbox("light on", &lightOn5);
+				if (lightOn5 != prevLightOn5)
+				{
+					toggleLight(5);
+					prevLightOn5 = lightOn5;
+				}
+				ImGui::SliderFloat("red", &lightR5, 0.0f, 1.0f);
+				ImGui::SliderFloat("green", &lightG5, 0.0f, 1.0f);
+				ImGui::SliderFloat("blue", &lightB5, 0.0f, 1.0f);
+				break;
+			case 6:
+				ImGui::Checkbox("light on", &lightOn6);
+				if (lightOn6 != prevLightOn6)
+				{
+					toggleLight(6);
+					prevLightOn6 = lightOn6;
+				}
+				ImGui::SliderFloat("red", &lightR6, 0.0f, 1.0f);
+				ImGui::SliderFloat("green", &lightG6, 0.0f, 1.0f);
+				ImGui::SliderFloat("blue", &lightB6, 0.0f, 1.0f);
+				break;
+			case 7:
+				ImGui::Checkbox("light on", &lightOn7);
+				if (lightOn7 != prevLightOn7)
+				{
+					toggleLight(7);
+					prevLightOn7 = lightOn7;
+				}
+				ImGui::SliderFloat("red", &lightR7, 0.0f, 1.0f);
+				ImGui::SliderFloat("green", &lightG7, 0.0f, 1.0f);
+				ImGui::SliderFloat("blue", &lightB7, 0.0f, 1.0f);
+				break;
+			}
+
+			//ImGui::ColorEdit3("clear color", (float*)&clear_color);
+			//if (ImGui::Button("Test Window")) show_test_window ^= 1;
+			//if (ImGui::Button("Another Window")) show_another_window ^= 1;
+			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+			ImGui::End();
+		}
 	}
 
 	ImGui::Render();
 
 	SDL_GL_SwapWindow(ptr_window);
 
+}
+
+void MainGame::toggleLight(int lightNumber)
+{
+	switch (lightNumber)
+	{
+	case 1:
+		if (glIsEnabled(GL_LIGHT1))
+		{
+			glDisable(GL_LIGHT1);
+		}
+		else
+		{
+			glEnable(GL_LIGHT1);
+		}
+		break;
+	case 2:
+		if (glIsEnabled(GL_LIGHT2))
+		{
+			glDisable(GL_LIGHT2);
+		}
+		else
+		{
+			glEnable(GL_LIGHT2);
+		}
+		break;
+	case 3:
+		if (glIsEnabled(GL_LIGHT3))
+		{
+			glDisable(GL_LIGHT3);
+		}
+		else
+		{
+			glEnable(GL_LIGHT3);
+		}
+		break;
+	case 4:
+		if (glIsEnabled(GL_LIGHT4))
+		{
+			glDisable(GL_LIGHT4);
+		}
+		else
+		{
+			glEnable(GL_LIGHT4);
+		}
+		break;
+	case 5:
+		if (glIsEnabled(GL_LIGHT5))
+		{
+			glDisable(GL_LIGHT5);
+		}
+		else
+		{
+			glEnable(GL_LIGHT5);
+		}
+		break;
+	case 6:
+		if (glIsEnabled(GL_LIGHT6))
+		{
+			glDisable(GL_LIGHT6);
+		}
+		else
+		{
+			glEnable(GL_LIGHT6);
+		}
+		break;
+	case 7:
+		if (glIsEnabled(GL_LIGHT7))
+		{
+			glDisable(GL_LIGHT7);
+		}
+		else
+		{
+			glEnable(GL_LIGHT7);
+		}
+		break;
+	}
 }
 
 void MainGame::calculateFPS()
